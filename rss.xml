@@ -1,4 +1,102 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Christian Brevik]]></title><description><![CDATA[A blog from a developer living in Oslo.]]></description><link>https://cbrevik.com</link><generator>RSS for Node</generator><lastBuildDate>Sat, 27 Oct 2018 09:46:24 GMT</lastBuildDate><item><title><![CDATA[Your first VS Code extension]]></title><description><![CDATA[It’s not a secret that VS Code is becoming a very popular choice as editor for many developers . I like the editor because it is snappy, and…]]></description><link>https://cbrevik.com/2018-03-08-your-first-vs-code-extension/</link><guid isPermaLink="false">https://cbrevik.com/2018-03-08-your-first-vs-code-extension/</guid><pubDate>Thu, 08 Mar 2018 09:59:00 GMT</pubDate><content:encoded>&lt;p&gt;It’s not a secret that VS Code is becoming a very popular choice as editor for many developers&lt;sup id=&quot;fnref-1&quot;&gt;&lt;a href=&quot;#fn-1&quot; class=&quot;footnote-ref&quot;&gt;1&lt;/a&gt;&lt;/sup&gt;. I like the editor because it is snappy, and has extensions for pretty much any language or framework I dive into.&lt;/p&gt;
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Christian Brevik]]></title><description><![CDATA[A blog from a developer living in Oslo.]]></description><link>https://cbrevik.com</link><generator>RSS for Node</generator><lastBuildDate>Sat, 27 Oct 2018 10:01:02 GMT</lastBuildDate><item><title><![CDATA[React Native and the Array.reverse bug]]></title><description><![CDATA[The news that broke a couple of days ago about the  -bug that occurs in the newly released iOS 12 was  a bit  scary. I first learnt about it…]]></description><link>https://cbrevik.com/2018-09-21-react-native-and-the-array-reverse-bug/</link><guid isPermaLink="false">https://cbrevik.com/2018-09-21-react-native-and-the-array-reverse-bug/</guid><pubDate>Fri, 21 Sep 2018 09:59:00 GMT</pubDate><content:encoded>&lt;p&gt;The news that broke a couple of days ago about the &lt;code class=&quot;language-text&quot;&gt;Array.reverse&lt;/code&gt;-bug that occurs in the newly released iOS 12 was &lt;em&gt;a bit&lt;/em&gt; scary. I first learnt about it from &lt;a href=&quot;https://stackoverflow.com/questions/52390368/array-state-will-be-cached-in-ios-12-safari-is-it-a-bug-or-feature/&quot;&gt;this Stack Overflow-post&lt;/a&gt; by way of &lt;a href=&quot;https://news.ycombinator.com/item?id=18021835&quot;&gt;Hacker News&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Developers have experienced a JavaScript-bug in Safari iOS 12, where an &lt;code class=&quot;language-text&quot;&gt;Array.reverse&lt;/code&gt; will cache the &lt;code class=&quot;language-text&quot;&gt;Array&lt;/code&gt; value state, which will still remain reversed even if you reload the page. I think most developers will understand why that is a problem. And apparently the same error exists on macOS as well, not just iOS.&lt;/p&gt;
+&lt;p&gt;After researching it a bit more, I found that it’s a bit misleading to call it a “Safari bug” though, because the &lt;a href=&quot;https://bugs.webkit.org/show_bug.cgi?id=188794&quot;&gt;WebKit bug report&lt;/a&gt; suggests that it actually exists in the &lt;code class=&quot;language-text&quot;&gt;JavaScriptCore&lt;/code&gt;-framework. Having contributed a bit to the React Native (RN) framework, I quickly noticed that this might be trouble. Because the RN JavaScript-bundle actually runs inside the &lt;code class=&quot;language-text&quot;&gt;JavaScriptCore&lt;/code&gt;-framework on iOS!&lt;/p&gt;
+&lt;p&gt;I am currently working at &lt;a href=&quot;https://www.ice.no/&quot;&gt;Ice&lt;/a&gt; (the Norwegian mobile operator) on their app, which is made with RN, and knew I had to look into this right away.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;What I found is that everyone who upgrades to iOS 12 on their device, will experience this bug with React Native-apps they have installed.&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;So RN-developers should start getting a &lt;strong&gt;little&lt;/strong&gt; worried.&lt;/p&gt;
+&lt;h1&gt;Demonstrating the bug&lt;/h1&gt;
+&lt;p&gt;I have made an &lt;a href=&quot;https://github.com/cbrevik/arrayReverseBug&quot;&gt;example app&lt;/a&gt; to demonstrate that this bug will occur in RN-apps as well:&lt;/p&gt;
+&lt;p&gt;
+  &lt;a
+    class=&quot;gatsby-resp-image-link&quot;
+    href=&quot;/static/red-1-7d5127cb50fb58391efab9a20fb33db2-a8524.png&quot;
+    style=&quot;display: block&quot;
+    target=&quot;_blank&quot;
+    rel=&quot;noopener&quot;
+  &gt;
+  
+  &lt;span
+    class=&quot;gatsby-resp-image-wrapper&quot;
+    style=&quot;position: relative; display: block;  max-width: 375px; margin-left: auto; margin-right: auto;&quot;
+  &gt;
+    &lt;span
+      class=&quot;gatsby-resp-image-background-image&quot;
+      style=&quot;padding-bottom: 177.86666666666667%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAkCAYAAACJ8xqgAAAACXBIWXMAAAsTAAALEwEAmpwYAAAB+0lEQVRIx+1VXXOiMBTl//+h/Qd92XFr6xcVRVFcHBWhhQSklLP3BkIBnU6n7cy+8HAmycnl3I8kF8M9+lhu/2Kx2cF2PaQA4tdCQb4BYXLBfL3B6MkiGxdJ8b7PEHm5/uXdYbi3YERZTh9liLK3lkEJQNCobZ7T187+u/05SxFeMhhMcCQ86s1bc23T5JprWcFoeutG2I2myXVHDaPp7SfQC/aCXxX86CJ/Bs1LbnSfET9+WZRPrQatk4rj5sFIKq77HFsR8geH5xinSOAsUvhxgkCmtJY4vQgExDneAdyhPD+Edw5VU7kZIRPsebXb42FqYjgx8Wc8xdSyMRhN8PthhMHjGEPaM21HtbKnlYPokl8LNuvwQgYMHbWOgBHKi+K4jQU05zHutL1akNPlNNmr5bgwl2s156Y7XdiYEbjJzpYrFeWjOcf9ZFbX9SpCLbo7nlVtFF9551Gn5scSNnX4+XqrHI7nC2z2x1q0JcikioYMJRtwUy0q8GkTF1Carh9gbC0xoBpzLfmA9K+hfQ85bTrl4+EEQScsKBoFOmFB5YiJk7RO+XcQRjhRJvoKXd9DFuUoRIJ0u4Mkz5J+XJJqWM4JlKpcbSBoP3G2SOhGxEVZmqtDibVoXqZao6hwa51/9FIaop9FHYTmvivY+iYv+gbbC/aC/0/wHzwa+XtkyElEAAAAAElFTkSuQmCC&apos;); background-size: cover; display: block;&quot;
+    &gt;
+      &lt;img
+        class=&quot;gatsby-resp-image-image&quot;
+        style=&quot;width: 100%; height: 100%; margin: 0; vertical-align: middle; position: absolute; top: 0; left: 0; box-shadow: inset 0px 0px 0px 400px white;&quot;
+        alt=&quot;The Array.reverse bug inside a React Native-app&quot;
+        title=&quot;&quot;
+        src=&quot;/static/red-1-7d5127cb50fb58391efab9a20fb33db2-a8524.png&quot;
+        srcset=&quot;/static/red-1-7d5127cb50fb58391efab9a20fb33db2-bfbd1.png 148w,
+/static/red-1-7d5127cb50fb58391efab9a20fb33db2-f2961.png 295w,
+/static/red-1-7d5127cb50fb58391efab9a20fb33db2-a8524.png 375w&quot;
+        sizes=&quot;(max-width: 375px) 100vw, 375px&quot;
+      /&gt;
+    &lt;/span&gt;
+  &lt;/span&gt;
+  
+  &lt;/a&gt;
+    &lt;/p&gt;
+&lt;p&gt;It is important to note here that if you have the RN remote debugger attached, this bug will not occur. This is because the remote debugger runs the JS-bundle inside of the Chrome-debugger.&lt;/p&gt;
+&lt;p&gt;Now your gut reaction may be to run to your codebases and search for “Array.reverse”, and manually fix it in all those locations. But remember that any dependencies you use will also experience the same bug. This might lead to some really subtle bugs that will be difficult to debug.&lt;/p&gt;
+&lt;h1&gt;Fixing the bug&lt;/h1&gt;
+&lt;p&gt;Of course, this being the JavaScript-community, someone has already released a &lt;a href=&quot;https://www.npmjs.com/package/array-reverse-polyfill&quot;&gt;polyfill for this bug&lt;/a&gt;. You can install this package with:&lt;/p&gt;
+&lt;p&gt;&lt;code class=&quot;language-text&quot;&gt;yarn add array-reverse-polyfill&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;And then include it up top in your root &lt;code class=&quot;language-text&quot;&gt;index.js&lt;/code&gt; file:&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;text&quot;&gt;&lt;pre class=&quot;language-text&quot;&gt;&lt;code class=&quot;language-text&quot;&gt;import &amp;quot;array-reverse-polyfill&amp;quot;;
+import { AppRegistry } from &amp;quot;react-native&amp;quot;;
+import App from &amp;quot;./App&amp;quot;;
+import { name as appName } from &amp;quot;./app.json&amp;quot;;
+
+AppRegistry.registerComponent(appName, () =&amp;gt; App);&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This will override the &lt;code class=&quot;language-text&quot;&gt;Array.prototype.reverse&lt;/code&gt; with a fixed version, if the original version is found to be buggy:&lt;/p&gt;
+&lt;p&gt;
+  &lt;a
+    class=&quot;gatsby-resp-image-link&quot;
+    href=&quot;/static/fixed-832dde755734838254325f18cde40bef-a8524.png&quot;
+    style=&quot;display: block&quot;
+    target=&quot;_blank&quot;
+    rel=&quot;noopener&quot;
+  &gt;
+  
+  &lt;span
+    class=&quot;gatsby-resp-image-wrapper&quot;
+    style=&quot;position: relative; display: block;  max-width: 375px; margin-left: auto; margin-right: auto;&quot;
+  &gt;
+    &lt;span
+      class=&quot;gatsby-resp-image-background-image&quot;
+      style=&quot;padding-bottom: 177.86666666666667%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAkCAYAAACJ8xqgAAAACXBIWXMAAAsTAAALEwEAmpwYAAACCUlEQVRIx+1VyXKjMBDl/39o/mAuqUw5seMVTDDYeGERXpAA22+6FUNhJTOTmhxy4fBK3S3x1C3RT1awi+H4K9iLJeZBCAXgWF01TmcgUxVGjov+ZIbFJoK8oplrjz/Cn+itZ7AO5RlCljiUl7sFbXtfnDXxgUaTqB6TUkEUJSwO5BfoifYi0/5TrPbzG6w6GzMr0zZj5ljDMjP4KjrCjvB/Cf/2I38G7Z/cMtuImz+/vrVjA/LlLcbiwZC3mNmOdxnyB9vsiOhwQnJSiI8Saa7IzxHtT0gp5oVbsEKFsUCYCC0qH2bIAd7ZXa7xNByj9zLGr8EQw9kcj/0XPDz18fg8QI/mxnOP5C7AxPXeKZBlNjlLFaPOus6AIfJCx1jKUrJ5PBqy1xByuVwm7zrzAoydV22z6A7tOUYEFlkWW87yeTylKkbNub7LsCYNdok+G44fqkuT5f5WWnzMtcJPPV9v2J/Y8NZbyBup1b6hgoIj28WEzki1blpe3sSTY5mssIpSDIiIz9mlCtbJvnkamgwTRTdaKISZgB9H2o9lTpAaqSoQsa9yZFWp161ECkG2KMvmrJtbfhUbOMkSHo1zEWrbTgK46RrTaEHwKUaPWRxgFvt6zss2mOw8OPFSvyen+glovwl3aJXLa2TLb6+p36S7kv/ZXhU+1YLWV3r4Q8JOYDvCjvA7CH8D6BD3UgRGkf8AAAAASUVORK5CYII=&apos;); background-size: cover; display: block;&quot;
+    &gt;
+      &lt;img
+        class=&quot;gatsby-resp-image-image&quot;
+        style=&quot;width: 100%; height: 100%; margin: 0; vertical-align: middle; position: absolute; top: 0; left: 0; box-shadow: inset 0px 0px 0px 400px white;&quot;
+        alt=&quot;fixed&quot;
+        title=&quot;&quot;
+        src=&quot;/static/fixed-832dde755734838254325f18cde40bef-a8524.png&quot;
+        srcset=&quot;/static/fixed-832dde755734838254325f18cde40bef-bfbd1.png 148w,
+/static/fixed-832dde755734838254325f18cde40bef-f2961.png 295w,
+/static/fixed-832dde755734838254325f18cde40bef-a8524.png 375w&quot;
+        sizes=&quot;(max-width: 375px) 100vw, 375px&quot;
+      /&gt;
+    &lt;/span&gt;
+  &lt;/span&gt;
+  
+  &lt;/a&gt;
+    &lt;/p&gt;
+&lt;p&gt;If you only want to apply this fix for devices running iOS 12, you could do something like this instead:&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;text&quot;&gt;&lt;pre class=&quot;language-text&quot;&gt;&lt;code class=&quot;language-text&quot;&gt;import { Platform } from &amp;quot;react-native&amp;quot;;
+if (Platform.Version === &amp;quot;12.0&amp;quot;) {
+  require(&amp;quot;array-reverse-polyfill&amp;quot;);
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;It’s important to say that I have not published any apps with this fix to the AppStore, and you should carefully test your apps if you want to apply this fix.&lt;/p&gt;
+&lt;h1&gt;Outro&lt;/h1&gt;
+&lt;p&gt;On a personal note, I think “just” applying fixes like this is going down the wrong road. If we have to manually polyfill for every little bug, then we’re reverting back to practices which were not productive to begin with. I believe it is a good idea to encourage people to upgrade to a version of iOS that fixes the problem, since it is a global bug which can affect many other apps.&lt;/p&gt;
+&lt;p&gt;But of course, if this bug causes major problems in your app, a quick fix is better than nothing.&lt;/p&gt;
+&lt;p&gt;It is important to note that this will also occur in other frameworks or apps using &lt;code class=&quot;language-text&quot;&gt;JavaScriptCore&lt;/code&gt;, which includes Chrome on iOS, and &lt;code class=&quot;language-text&quot;&gt;WebViews&lt;/code&gt; which native apps are displaying, etc.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/cbrevik/arrayReverseBug&quot;&gt;Check out the example code here&lt;/a&gt; if you want to test for yourself.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Note:&lt;/strong&gt; This was orginally &lt;a href=&quot;https://blog.novanet.no/react-native-and-the-array-reverse-bug/&quot;&gt;posted on the Novanet blog&lt;/a&gt;. Check out that blog for more .NET- and RN-related content.&lt;/p&gt;</content:encoded></item><item><title><![CDATA[Your first VS Code extension]]></title><description><![CDATA[It’s not a secret that VS Code is becoming a very popular choice as editor for many developers . I like the editor because it is snappy, and…]]></description><link>https://cbrevik.com/2018-03-08-your-first-vs-code-extension/</link><guid isPermaLink="false">https://cbrevik.com/2018-03-08-your-first-vs-code-extension/</guid><pubDate>Thu, 08 Mar 2018 09:59:00 GMT</pubDate><content:encoded>&lt;p&gt;It’s not a secret that VS Code is becoming a very popular choice as editor for many developers&lt;sup id=&quot;fnref-1&quot;&gt;&lt;a href=&quot;#fn-1&quot; class=&quot;footnote-ref&quot;&gt;1&lt;/a&gt;&lt;/sup&gt;. I like the editor because it is snappy, and has extensions for pretty much any language or framework I dive into.&lt;/p&gt;
 &lt;p&gt;One feature I love using with VS Code is “Format on Save”, especially paired with code formatters like &lt;a href=&quot;https://github.com/prettier/prettier&quot;&gt;Prettier&lt;/a&gt;. But a thing which has annoyed me with that feature, is that it is kind of difficult to turn on and off.&lt;/p&gt;
 &lt;p&gt;You have to go into the &lt;code class=&quot;language-text&quot;&gt;settings.json&lt;/code&gt; file and set the &lt;code class=&quot;language-text&quot;&gt;editor.formatOnSave&lt;/code&gt; field to &lt;code class=&quot;language-text&quot;&gt;true&lt;/code&gt; or &lt;code class=&quot;language-text&quot;&gt;false&lt;/code&gt;. This gets really tedious when you’re switching between projects, some of it Open Source with peculiar code formatting, or if you just don’t want to reformat a whole file for some small change.&lt;/p&gt;
 &lt;p&gt;Maybe we could make life easier by creating an extension for this? Turns out that’s not so difficult.&lt;/p&gt;
