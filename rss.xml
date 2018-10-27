@@ -1,0 +1,1025 @@
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Christian Brevik]]></title><description><![CDATA[A blog from a developer living in Oslo.]]></description><link>https://cbrevik.com</link><generator>RSS for Node</generator><lastBuildDate>Sat, 27 Oct 2018 09:22:28 GMT</lastBuildDate><item><title><![CDATA[Your first VS Code extension]]></title><description><![CDATA[It’s not a secret that VS Code is becoming a very popular choice as editor for many developers . I like the editor because it is snappy, and…]]></description><link>https://cbrevik.com/2018-03-08-your-first-vs-code-extension/</link><guid isPermaLink="false">https://cbrevik.com/2018-03-08-your-first-vs-code-extension/</guid><pubDate>Thu, 08 Mar 2018 09:59:00 GMT</pubDate><content:encoded>&lt;p&gt;It’s not a secret that VS Code is becoming a very popular choice as editor for many developers&lt;sup id=&quot;fnref-1&quot;&gt;&lt;a href=&quot;#fn-1&quot; class=&quot;footnote-ref&quot;&gt;1&lt;/a&gt;&lt;/sup&gt;. I like the editor because it is snappy, and has extensions for pretty much any language or framework I dive into.&lt;/p&gt;
+&lt;p&gt;One feature I love using with VS Code is “Format on Save”, especially paired with code formatters like &lt;a href=&quot;https://github.com/prettier/prettier&quot;&gt;Prettier&lt;/a&gt;. But a thing which has annoyed me with that feature, is that it is kind of difficult to turn on and off.&lt;/p&gt;
+&lt;p&gt;You have to go into the &lt;code class=&quot;language-text&quot;&gt;settings.json&lt;/code&gt; file and set the &lt;code class=&quot;language-text&quot;&gt;editor.formatOnSave&lt;/code&gt; field to &lt;code class=&quot;language-text&quot;&gt;true&lt;/code&gt; or &lt;code class=&quot;language-text&quot;&gt;false&lt;/code&gt;. This gets really tedious when you’re switching between projects, some of it Open Source with peculiar code formatting, or if you just don’t want to reformat a whole file for some small change.&lt;/p&gt;
+&lt;p&gt;Maybe we could make life easier by creating an extension for this? Turns out that’s not so difficult.&lt;/p&gt;
+&lt;h3&gt;Creating the extension project&lt;/h3&gt;
+&lt;p&gt;The easiest way I’ve found to get started, is using &lt;a href=&quot;http://yeoman.io/&quot;&gt;Yeoman&lt;/a&gt; to create the extension project.&lt;/p&gt;
+&lt;p&gt;Install both Yeoman and the extension template by running the following in your terminal of choice:&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;bash&quot;&gt;&lt;pre class=&quot;language-bash&quot;&gt;&lt;code class=&quot;language-bash&quot;&gt;&lt;span class=&quot;token function&quot;&gt;npm&lt;/span&gt; &lt;span class=&quot;token function&quot;&gt;install&lt;/span&gt; -g yo generator-code&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Then create the extension project by running:&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;bash&quot;&gt;&lt;pre class=&quot;language-bash&quot;&gt;&lt;code class=&quot;language-bash&quot;&gt;yo code&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;You will then get asked several questions to setup the project. These are the choices I made:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;What type of extension do you want to create? &lt;strong&gt;New Extension (TypeScript)&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;What’s the name of your extension? &lt;strong&gt;Toggle Format on Save&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;What’s the identifier of your extension? &lt;strong&gt;toggle-format-on-save&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;What’s the description of your extension? &lt;strong&gt;Provides a command to toggle Format on Save&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;What’s your publisher name? &lt;strong&gt;cbrevik&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;Enable stricter TypeScript checking in ‘tsconfig.json’? &lt;strong&gt;Yes&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;Setup linting using ‘tslint’? &lt;strong&gt;Yes&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;Initialize a git repository? &lt;strong&gt;Yes&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;I chose to create an extension written in TypeScript (1), but you also have other options like color themes or code snippets.&lt;/p&gt;
+&lt;p&gt;The name (2) is what will be displayed for your extension in the VS Code marketplace. While the identifier (3) will be concatenated to your publisher name (5), which will uniquely identify your extension. In this case &lt;code class=&quot;language-text&quot;&gt;cbrevik.toggle-format-on-save&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;If you don’t have a publisher name yet, just put whatever. It can be changed later by editing the &lt;code class=&quot;language-text&quot;&gt;publisher&lt;/code&gt; field in the generated &lt;code class=&quot;language-text&quot;&gt;package.json&lt;/code&gt;. I’ll show you how to create a publisher further below in this post.&lt;/p&gt;
+&lt;p&gt;The rest of the options are pretty straightforward. If in doubt, answer &lt;strong&gt;Yes&lt;/strong&gt;.&lt;/p&gt;
+&lt;h3&gt;Diving into the code&lt;/h3&gt;
+&lt;p&gt;The template code defines a command called &lt;code class=&quot;language-text&quot;&gt;Hello World&lt;/code&gt; which will display a “Hello World!” notification at the top of your VS Code instance:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/helloworldloop-2dac0e8e29036acfcdb9a6578cd51ec9.gif&quot; alt=&quot;Hello world demo&quot;&gt;&lt;/p&gt;
+&lt;p&gt;This is made possible by three connected snippets of code in the &lt;code class=&quot;language-text&quot;&gt;package.json&lt;/code&gt; file and the &lt;code class=&quot;language-text&quot;&gt;src/extension.ts&lt;/code&gt; file.&lt;/p&gt;
+&lt;p&gt;You tell VS Code that your extension &lt;strong&gt;contributes&lt;/strong&gt; a command by adding it in &lt;code class=&quot;language-text&quot;&gt;package.json&lt;/code&gt; under the &lt;code class=&quot;language-text&quot;&gt;contributes&lt;/code&gt; field, as an object in the &lt;code class=&quot;language-text&quot;&gt;commands&lt;/code&gt; array:&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;json&quot;&gt;&lt;pre class=&quot;language-json&quot;&gt;&lt;code class=&quot;language-json&quot;&gt;    &lt;span class=&quot;token property&quot;&gt;&quot;contributes&quot;&lt;/span&gt;&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;token property&quot;&gt;&quot;commands&quot;&lt;/span&gt;&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;[&lt;/span&gt;
+            &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;token property&quot;&gt;&quot;command&quot;&lt;/span&gt;&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token string&quot;&gt;&quot;extension.sayHello&quot;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;
+                &lt;span class=&quot;token property&quot;&gt;&quot;title&quot;&lt;/span&gt;&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token string&quot;&gt;&quot;Hello World&quot;&lt;/span&gt;
+            &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;token punctuation&quot;&gt;]&lt;/span&gt;
+    &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Take note of the &lt;code class=&quot;language-text&quot;&gt;command&lt;/code&gt; field value &lt;code class=&quot;language-text&quot;&gt;extension.sayHello&lt;/code&gt;, which is the key for this command. The &lt;code class=&quot;language-text&quot;&gt;title&lt;/code&gt; is the text displayed in the Command Palette you see in the gif above.&lt;/p&gt;
+&lt;p&gt;Another thing which has to be added to &lt;code class=&quot;language-text&quot;&gt;package.json&lt;/code&gt; is &lt;code class=&quot;language-text&quot;&gt;activationEvents&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;json&quot;&gt;&lt;pre class=&quot;language-json&quot;&gt;&lt;code class=&quot;language-json&quot;&gt;    &lt;span class=&quot;token property&quot;&gt;&quot;activationEvents&quot;&lt;/span&gt;&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;[&lt;/span&gt;
+        &lt;span class=&quot;token string&quot;&gt;&quot;onCommand:extension.sayHello&quot;&lt;/span&gt;
+    &lt;span class=&quot;token punctuation&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This is because in VS Code, extensions are activated lazily. So you will have to define the events which will activate your extension. In our case, we say that our extension will be activated when the &lt;code class=&quot;language-text&quot;&gt;extension.sayHello&lt;/code&gt; command is run.&lt;sup id=&quot;fnref-2&quot;&gt;&lt;a href=&quot;#fn-2&quot; class=&quot;footnote-ref&quot;&gt;2&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;
+&lt;p&gt;To actually implement the command itself, we have a &lt;code class=&quot;language-text&quot;&gt;src/extension.ts&lt;/code&gt; file, which exports an &lt;code class=&quot;language-text&quot;&gt;activate&lt;/code&gt; function:&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;javascript&quot;&gt;&lt;pre class=&quot;language-javascript&quot;&gt;&lt;code class=&quot;language-javascript&quot;&gt;&lt;span class=&quot;token keyword&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;token operator&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;token keyword&quot;&gt;as&lt;/span&gt; vscode &lt;span class=&quot;token keyword&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;token string&quot;&gt;&apos;vscode&apos;&lt;/span&gt;
+
+&lt;span class=&quot;token keyword&quot;&gt;export&lt;/span&gt; &lt;span class=&quot;token keyword&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;token function&quot;&gt;activate&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;context&lt;span class=&quot;token punctuation&quot;&gt;:&lt;/span&gt; vscode&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;ExtensionContext&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;token comment&quot;&gt;// do stuff here&lt;/span&gt;
+&lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This function will, not surprisingly, be run when the &lt;code class=&quot;language-text&quot;&gt;activationEvent&lt;/code&gt; defined above is emitted. This happens when we run &lt;code class=&quot;language-text&quot;&gt;Hello World&lt;/code&gt; in the VS Code Command Palette.&lt;/p&gt;
+&lt;p&gt;Inside the &lt;code class=&quot;language-text&quot;&gt;activate&lt;/code&gt; function we have to register the command implementation. Note that we’re using the same &lt;code class=&quot;language-text&quot;&gt;command&lt;/code&gt; key as defined in &lt;code class=&quot;language-text&quot;&gt;package.json&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;The command is also added to the &lt;code class=&quot;language-text&quot;&gt;context.subscriptions&lt;/code&gt; array, so it can be disposed if the extension is deactivated:&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;javascript&quot;&gt;&lt;pre class=&quot;language-javascript&quot;&gt;&lt;code class=&quot;language-javascript&quot;&gt;&lt;span class=&quot;token keyword&quot;&gt;export&lt;/span&gt; &lt;span class=&quot;token keyword&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;token function&quot;&gt;activate&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;context&lt;span class=&quot;token punctuation&quot;&gt;:&lt;/span&gt; vscode&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;ExtensionContext&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;token keyword&quot;&gt;const&lt;/span&gt; disposable &lt;span class=&quot;token operator&quot;&gt;=&lt;/span&gt; vscode&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;commands&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;registerCommand&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;
+    &lt;span class=&quot;token string&quot;&gt;&apos;extension.sayHello&apos;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;token operator&quot;&gt;=&gt;&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+      vscode&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;window&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;showInformationMessage&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token string&quot;&gt;&apos;Hello World!&apos;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;
+  &lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+
+  context&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;subscriptions&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;push&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;disposable&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;As you see the &lt;code class=&quot;language-text&quot;&gt;registerCommand&lt;/code&gt; function lets you define a callback, which is invoked when the command with the &lt;code class=&quot;language-text&quot;&gt;extension.sayHello&lt;/code&gt; key is run. This callback in turn displays the “Hello World!” notification at the top of your VS Code instance.&lt;/p&gt;
+&lt;h4&gt;Debugging the extension&lt;/h4&gt;
+&lt;p&gt;If you want to test the extension, this can be done by hitting &lt;code class=&quot;language-text&quot;&gt;F5&lt;/code&gt; on your keyboard (or &lt;code class=&quot;language-text&quot;&gt;Debug -&amp;gt; Start Debugging&lt;/code&gt;) if you have the &lt;strong&gt;extension project&lt;/strong&gt; open in VS Code. This will compile the TypeScript, and open a second &lt;strong&gt;test&lt;/strong&gt; VS Code window with the extension loaded.&lt;/p&gt;
+&lt;p&gt;In the &lt;strong&gt;test&lt;/strong&gt; window, you can open the Command Palette (&lt;code class=&quot;language-text&quot;&gt;CMD&lt;/code&gt;/&lt;code class=&quot;language-text&quot;&gt;CTRL&lt;/code&gt;+&lt;code class=&quot;language-text&quot;&gt;SHIFT&lt;/code&gt;+&lt;code class=&quot;language-text&quot;&gt;P&lt;/code&gt;), type &lt;code class=&quot;language-text&quot;&gt;Hello World&lt;/code&gt;, and then hit &lt;code class=&quot;language-text&quot;&gt;Enter&lt;/code&gt;. This will activate your extension, and run the command implementation, which will display the “Hello World!” notification.&lt;/p&gt;
+&lt;p&gt;You can also set breakpoints in the &lt;strong&gt;extension project&lt;/strong&gt; window, and step-through the code as you would expect.&lt;/p&gt;
+&lt;p&gt;If you want to do iterative development like this, you can have the code compile continuously by running &lt;code class=&quot;language-text&quot;&gt;npm run watch&lt;/code&gt; in the project folder. This means that whenever you make a code change in the extension project, this will re-compile the TypeScript.&lt;/p&gt;
+&lt;p&gt;All you have to do then, is reload the &lt;strong&gt;test&lt;/strong&gt; window, by running &lt;code class=&quot;language-text&quot;&gt;Reload Window&lt;/code&gt; from your Command Palette in that window. Almost like doing web development!&lt;/p&gt;
+&lt;h4&gt;Publishing your extension&lt;/h4&gt;
+&lt;p&gt;When you’re ready to publish your extension to the marketplace, you will have to create a &lt;code class=&quot;language-text&quot;&gt;publisher&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;In order to do this, you need a &lt;a href=&quot;https://docs.microsoft.com/vsts/accounts/create-account-msa-or-work-student#create-your-account-and-sign-up-for-vsts&quot;&gt;Visual Studio Team Services account&lt;/a&gt;. This is because VS Code leverages VSTS to publish to the marketplace.&lt;/p&gt;
+&lt;p&gt;During the registration process you will have to define a username. The account home page URL will have the format &lt;code class=&quot;language-text&quot;&gt;&amp;lt;your-username&amp;gt;.visualstudio.com&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;For anyone already registered, and unsure of their username, you can go to &lt;a href=&quot;https://visualstudio.com&quot;&gt;https://visualstudio.com&lt;/a&gt;, login, and you will see your accounts.&lt;/p&gt;
+&lt;p&gt;You should then go to your account home page, click on your avatar in the menu top-right, and select &lt;code class=&quot;language-text&quot;&gt;Security&lt;/code&gt;. Under &lt;code class=&quot;language-text&quot;&gt;Personal Access Token&lt;/code&gt; you select &lt;code class=&quot;language-text&quot;&gt;Add&lt;/code&gt;. Fill in the following:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Description: &lt;strong&gt;vsce&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;Expires In: &lt;strong&gt;1 year&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;Accounts: &lt;strong&gt;All accessible accounts&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;Authorized scopes: &lt;strong&gt;All scopes&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Next click &lt;code class=&quot;language-text&quot;&gt;Create Token&lt;/code&gt; below. You now have the &lt;code class=&quot;language-text&quot;&gt;Personal Access Token&lt;/code&gt; which will be used to publish the extension. Keep this safe, as it will only be shown once.&lt;/p&gt;
+&lt;p&gt;Now you will have to install the publishing tool:&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;bash&quot;&gt;&lt;pre class=&quot;language-bash&quot;&gt;&lt;code class=&quot;language-bash&quot;&gt;&lt;span class=&quot;token function&quot;&gt;npm&lt;/span&gt; &lt;span class=&quot;token function&quot;&gt;install&lt;/span&gt; -g vsce&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Then create the publisher by running:&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;bash&quot;&gt;&lt;pre class=&quot;language-bash&quot;&gt;&lt;code class=&quot;language-bash&quot;&gt;vsce create-publisher &lt;span class=&quot;token operator&quot;&gt;&amp;lt;&lt;/span&gt;your-publisher-name&lt;span class=&quot;token operator&quot;&gt;&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;You will then be asked for a friendly display name, e-mail, and the &lt;code class=&quot;language-text&quot;&gt;Personal Access Token&lt;/code&gt; we just created.&lt;/p&gt;
+&lt;p&gt;Remember earlier in the post when I asked you to input whatever publisher in the &lt;code class=&quot;language-text&quot;&gt;yo code&lt;/code&gt; template generator? If your created publisher name doesn’t match the &lt;code class=&quot;language-text&quot;&gt;publisher&lt;/code&gt; field in the &lt;code class=&quot;language-text&quot;&gt;package.json&lt;/code&gt; file, you will now have to update it.&lt;/p&gt;
+&lt;p&gt;If you host the code on Github or similar, you can link back to the repository from the marketplace, by specifying the repository URL in your &lt;code class=&quot;language-text&quot;&gt;package.json&lt;/code&gt;. For my extension this would be:&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;json&quot;&gt;&lt;pre class=&quot;language-json&quot;&gt;&lt;code class=&quot;language-json&quot;&gt;  &lt;span class=&quot;token property&quot;&gt;&quot;repository&quot;&lt;/span&gt;&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;token property&quot;&gt;&quot;type&quot;&lt;/span&gt;&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token string&quot;&gt;&quot;git&quot;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;token property&quot;&gt;&quot;url&quot;&lt;/span&gt;&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token string&quot;&gt;&quot;https://github.com/cbrevik/toggle-format-on-save&quot;&lt;/span&gt;
+  &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Finally, to actually publish your extension, navigate to your project folder, and run:&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;bash&quot;&gt;&lt;pre class=&quot;language-bash&quot;&gt;&lt;code class=&quot;language-bash&quot;&gt;vsce publish&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;If you want to publish updates later, you can increment the &lt;code class=&quot;language-text&quot;&gt;version&lt;/code&gt; field in &lt;code class=&quot;language-text&quot;&gt;package.json&lt;/code&gt;, and then publish. The tool can also do increment and publish in one go if you run:&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;bash&quot;&gt;&lt;pre class=&quot;language-bash&quot;&gt;&lt;code class=&quot;language-bash&quot;&gt;vsce publish minor&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This follows &lt;a href=&quot;https://semver.org&quot;&gt;semver&lt;/a&gt;, so you can replace &lt;code class=&quot;language-text&quot;&gt;minor&lt;/code&gt; with &lt;code class=&quot;language-text&quot;&gt;major&lt;/code&gt; or &lt;code class=&quot;language-text&quot;&gt;patch&lt;/code&gt;.&lt;/p&gt;
+&lt;h4&gt;Toggle Format on Save&lt;/h4&gt;
+&lt;p&gt;The very simple extension I wrote about in the introduction is published at the VS Code marketplace as &lt;a href=&quot;https://marketplace.visualstudio.com/items?itemName=cbrevik.toggle-format-on-save&quot;&gt;Toggle Format on Save&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;You can take a &lt;a href=&quot;https://github.com/cbrevik/toggle-format-on-save&quot;&gt;look at the code&lt;/a&gt; if you’re interested, which does a bit more than just print “Hello World!“.&lt;/p&gt;
+&lt;p&gt;Hope this post has been helpful!&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Note:&lt;/strong&gt; This was orginally &lt;a href=&quot;https://blog.novanet.no/your-first-vs-code-extension/&quot;&gt;posted on the Novanet blog&lt;/a&gt;. Check out that blog for more .NET-related content.&lt;/p&gt;
+&lt;div class=&quot;footnotes&quot;&gt;
+&lt;hr&gt;
+&lt;ol&gt;
+&lt;li id=&quot;fn-1&quot;&gt;
+&lt;p&gt;  According to StackOverflow’s 2017 Developer Survey it places &lt;a href=&quot;https://insights.stackoverflow.com/survey/2017#technology-most-popular-developer-environments-by-occupation&quot;&gt;5th among web developers&lt;/a&gt;.&lt;/p&gt;
+&lt;a href=&quot;#fnref-1&quot; class=&quot;footnote-backref&quot;&gt;↩&lt;/a&gt;
+&lt;/li&gt;
+&lt;li id=&quot;fn-2&quot;&gt;
+&lt;p&gt;  &lt;a href=&quot;https://code.visualstudio.com/docs/extensionAPI/activation-events&quot;&gt;Several more activation events can be defined.&lt;/a&gt; You could even use wildcard to activate your extension at startup. Though that is not recommended unless necessary.&lt;/p&gt;
+&lt;a href=&quot;#fnref-2&quot; class=&quot;footnote-backref&quot;&gt;↩&lt;/a&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;</content:encoded></item><item><title><![CDATA[Easier React Native upgrades with patch-package]]></title><description><![CDATA[Anyone who has worked with React Native (RN) for some time know that the core contributors are not afraid of introducing breaking changes…]]></description><link>https://cbrevik.com/2017-08-19-patch-package/</link><guid isPermaLink="false">https://cbrevik.com/2017-08-19-patch-package/</guid><pubDate>Sat, 19 Aug 2017 10:59:00 GMT</pubDate><content:encoded>&lt;p&gt;Anyone who has worked with React Native (RN) for some time know that the core contributors are not afraid of introducing breaking changes. So upgrading from one version to the next can sometimes be difficult.&lt;/p&gt;
+&lt;p&gt;It became a lot easier when they introduced &lt;a href=&quot;https://www.npmjs.com/package/react-native-git-upgrade&quot;&gt;&lt;code class=&quot;language-text&quot;&gt;react-native-git-upgrade&lt;/code&gt;&lt;/a&gt;, which if you aren’t using yet, then you are seriously missing out.&lt;/p&gt;
+&lt;p&gt;But that just helps you upgrade your project code, what about your dependencies? For example in RN &lt;a href=&quot;https://github.com/facebook/react-native/releases/tag/v0.47.0&quot;&gt;&lt;code class=&quot;language-text&quot;&gt;0.47.0&lt;/code&gt;&lt;/a&gt; they removed &lt;code class=&quot;language-text&quot;&gt;createJSModules&lt;/code&gt; which countless modules (&lt;a href=&quot;https://github.com/idehub/react-native-google-analytics-bridge/blob/127886b27d80f1a20ee788ead6f6b79e43eef6f1/android/src/main/java/com/idehub/GoogleAnalyticsBridge/GoogleAnalyticsBridgePackage.java#L36-L39&quot;&gt;even one of mine&lt;/a&gt;) have been overriding in their Android &lt;code class=&quot;language-text&quot;&gt;ReactPackage&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Because it no longer existed, the &lt;code class=&quot;language-text&quot;&gt;@Override&lt;/code&gt; annotation on the &lt;code class=&quot;language-text&quot;&gt;createJSModules&lt;/code&gt; method meant the module wouldn’t compile at all. This effectively broke the dependencies of people who decided to upgrade to RN &lt;code class=&quot;language-text&quot;&gt;0.47.0&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Fixing it is almost too easy. Just &lt;a href=&quot;https://github.com/idehub/react-native-google-analytics-bridge/blob/915ae33b5a107d27d5562666a3c1cb04f3f0c805/android/src/main/java/com/idehub/GoogleAnalyticsBridge/GoogleAnalyticsBridgePackage.java#L36&quot;&gt;remove the annotation&lt;/a&gt;, and the module will compile again. But not every dependency I was using for my app had fixed it yet. And that’s totally fine, working with open source is something people do voluntary, and a lot of the time life gets in the way&lt;sup id=&quot;fnref-1&quot;&gt;&lt;a href=&quot;#fn-1&quot; class=&quot;footnote-ref&quot;&gt;1&lt;/a&gt;&lt;/sup&gt;.&lt;/p&gt;
+&lt;p&gt;At this point we could roll back to the previous version of RN, and philosophize on the dangers of staying on the bleeding edge. But sometimes you just need to upgrade. In my case I needed a &lt;a href=&quot;https://github.com/facebook/react-native/commit/64825389dfb4e01d5b30cd63b0b41937a9bb431d&quot;&gt;bugfix&lt;/a&gt; which affected debugging an app.&lt;/p&gt;
+&lt;p&gt;So, the non-compiling module hasn’t been updated yet, but you know how to fix it. One possibility is forking the dependency on Github, add the fix, and point your &lt;code class=&quot;language-text&quot;&gt;package.json&lt;/code&gt; to that fork.&lt;/p&gt;
+&lt;p&gt;But that’s a bit like using a sledgehammer to crack a nut. Either way, it will probably be fixed soon upstream.&lt;/p&gt;
+&lt;h3&gt;Use patch-package instead&lt;/h3&gt;
+&lt;p&gt;I suggest instead that you use &lt;a href=&quot;https://github.com/ds300/patch-package&quot;&gt;patch-package&lt;/a&gt; which will let you patch your dependencies. This is another nice utility from &lt;a href=&quot;https://github.com/ds300/&quot;&gt;David Sheldrick&lt;/a&gt;, who also made the TypeScript-transformer in my &lt;a href=&quot;/easy-typescript-with-react-native&quot;&gt;other blog post&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;This utility will generate a &lt;code class=&quot;language-text&quot;&gt;.patch&lt;/code&gt; file, which you can commit to your repository. And then &lt;code class=&quot;language-text&quot;&gt;patch-package&lt;/code&gt; will re-apply the fix everytime someone installs the dependencies, which works with both &lt;code class=&quot;language-text&quot;&gt;npm&lt;/code&gt; and &lt;code class=&quot;language-text&quot;&gt;yarn&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;It is quite simple to set up, you install it in your project with:&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;text&quot;&gt;&lt;pre class=&quot;language-text&quot;&gt;&lt;code class=&quot;language-text&quot;&gt;yarn add --dev patch-package&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Then add the following script in your &lt;code class=&quot;language-text&quot;&gt;package.json&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;json&quot;&gt;&lt;pre class=&quot;language-json&quot;&gt;&lt;code class=&quot;language-json&quot;&gt;&lt;span class=&quot;token property&quot;&gt;&quot;scripts&quot;&lt;/span&gt;&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;token property&quot;&gt;&quot;prepare&quot;&lt;/span&gt;&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token string&quot;&gt;&quot;patch-package&quot;&lt;/span&gt;
+&lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Next you can fix the dependency as it is in your &lt;code class=&quot;language-text&quot;&gt;node_modules&lt;/code&gt; directory, and then create a &lt;code class=&quot;language-text&quot;&gt;.patch&lt;/code&gt; file.&lt;/p&gt;
+&lt;h3&gt;An example&lt;/h3&gt;
+&lt;p&gt;Let’s say we’re using &lt;code class=&quot;language-text&quot;&gt;react-native-google-analytics-bridge@5.1.0&lt;/code&gt; in our app, which was a pre-&lt;code class=&quot;language-text&quot;&gt;0.47&lt;/code&gt; version. The offending file in this case is &lt;code class=&quot;language-text&quot;&gt;GoogleAnalyticsBridgePackage.java&lt;/code&gt;, on &lt;a href=&quot;https://github.com/idehub/react-native-google-analytics-bridge/blob/127886b27d80f1a20ee788ead6f6b79e43eef6f1/android/src/main/java/com/idehub/GoogleAnalyticsBridge/GoogleAnalyticsBridgePackage.java#L36&quot;&gt;line 36&lt;/a&gt;. That &lt;code class=&quot;language-text&quot;&gt;@Override&lt;/code&gt; annotation is preventing the module from compiling.&lt;/p&gt;
+&lt;p&gt;We can open that file in an editor, e.g. &lt;code class=&quot;language-text&quot;&gt;vim node_modules/react-native-google-analytics-bridge/android/src/main/java/com/idehub/GoogleAnalyticsBridge/GoogleAnalyticsBridgePackage.java&lt;/code&gt;, to fix the bug in the installed dependency. In this case I just remove &lt;code class=&quot;language-text&quot;&gt;@Override&lt;/code&gt;, and add &lt;code class=&quot;language-text&quot;&gt;// Removed in RN 0.47.0&lt;/code&gt; instead.&lt;/p&gt;
+&lt;p&gt;I then save the file, and run &lt;code class=&quot;language-text&quot;&gt;yarn run patch-package -- react-native-google-analytics-bridge&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;text&quot;&gt;&lt;pre class=&quot;language-text&quot;&gt;&lt;code class=&quot;language-text&quot;&gt;☑ Creating temporary folder
+☑ Building clean node_modules with yarn
+☑ Diffing your files with clean files
+✔ Created file patches/react-native-google-analytics-bridge+5.1.0.patch&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;As you see, it compares a clean install to your modified dependency, and creates a &lt;code class=&quot;language-text&quot;&gt;patches&lt;/code&gt; directory, with a &lt;code class=&quot;language-text&quot;&gt;.patch&lt;/code&gt; file. The name of the patch contains the dependency-name and the version number.&lt;/p&gt;
+&lt;p&gt;The patch file itself is very readable if you open it in the correct software. I like using Beyond Compare or VS Code:&lt;/p&gt;
+&lt;p&gt;
+  &lt;a
+    class=&quot;gatsby-resp-image-link&quot;
+    href=&quot;/static/patch-1-271de3d1d77f0c68bf602f8ce8d1198b-dbeef.png&quot;
+    style=&quot;display: block&quot;
+    target=&quot;_blank&quot;
+    rel=&quot;noopener&quot;
+  &gt;
+  
+  &lt;span
+    class=&quot;gatsby-resp-image-wrapper&quot;
+    style=&quot;position: relative; display: block;  max-width: 590px; margin-left: auto; margin-right: auto;&quot;
+  &gt;
+    &lt;span
+      class=&quot;gatsby-resp-image-background-image&quot;
+      style=&quot;padding-bottom: 40%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAICAYAAAD5nd/tAAAACXBIWXMAABYlAAAWJQFJUiTwAAABWklEQVQoz3WRWXKDMBBEOYdZBQhhVrPaoUjsxLGdtSr3v0xnZoizfOTj1ahHUjO0LN/3UdUlEqORJAliHUMTURwJOtHSkzXvkc7yDCY1SNcpQVXWhu5rWGx4u59xeTnh6fWMx/MDjgT37o8HvH+84fJ8ov5RevWmRj906PoWm2ZDw1Ro2kbWjBWGIdqONqoCw9hjmm+wP9xhmiaUVSkX+GDbtaKzLENZlkJRFKTXVJc+YwVBAMex4XoefKWgwgj8kVhruK6L1WoF27a/q+M4wn9rKyQT3/eQExUZG4IPMGzoEO4X10vMt7Z/tEdDWQEZumSWUahFUyMpC8RFjoiqot+JKXCZOObH0jDGSI2iaNGpWR6T9vk9LKUCBIEHQ4btMKAbR2y3W4xE13eY51n0brejnCvJjrNi4zzPJWPOMk1TKBpOMmTDMFTyBdbXeoUPLlk7f7L8ne01ok9Ra+lQ5yOH8AAAAABJRU5ErkJggg==&apos;); background-size: cover; display: block;&quot;
+    &gt;
+      &lt;img
+        class=&quot;gatsby-resp-image-image&quot;
+        style=&quot;width: 100%; height: 100%; margin: 0; vertical-align: middle; position: absolute; top: 0; left: 0; box-shadow: inset 0px 0px 0px 400px white;&quot;
+        alt=&quot;patch file&quot;
+        title=&quot;&quot;
+        src=&quot;/static/patch-1-271de3d1d77f0c68bf602f8ce8d1198b-fb8a0.png&quot;
+        srcset=&quot;/static/patch-1-271de3d1d77f0c68bf602f8ce8d1198b-1a291.png 148w,
+/static/patch-1-271de3d1d77f0c68bf602f8ce8d1198b-2bc4a.png 295w,
+/static/patch-1-271de3d1d77f0c68bf602f8ce8d1198b-fb8a0.png 590w,
+/static/patch-1-271de3d1d77f0c68bf602f8ce8d1198b-526de.png 885w,
+/static/patch-1-271de3d1d77f0c68bf602f8ce8d1198b-fa2eb.png 1180w,
+/static/patch-1-271de3d1d77f0c68bf602f8ce8d1198b-dbeef.png 1310w&quot;
+        sizes=&quot;(max-width: 590px) 100vw, 590px&quot;
+      /&gt;
+    &lt;/span&gt;
+  &lt;/span&gt;
+  
+  &lt;/a&gt;
+    &lt;/p&gt;
+&lt;p&gt;As long as the file resides in your &lt;code class=&quot;language-text&quot;&gt;patches&lt;/code&gt; directory (with the correct name), it will automatically patch the module for both you and your colleagues when you install dependencies:&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;text&quot;&gt;&lt;pre class=&quot;language-text&quot;&gt;&lt;code class=&quot;language-text&quot;&gt;&amp;gt; yarn
+yarn install v0.27.5
+[1/4] Resolving packages...
+[2/4] Fetching packages...
+[3/4] Linking dependencies...
+[4/4] Building fresh packages...
+$ patch-package
+patch-package: Applying patches...
+react-native-google-analytics-bridge@5.1.0 ✔&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;If the dependency you have patched is updated later, and the patch cannot be applied then you will get an error:&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;text&quot;&gt;&lt;pre class=&quot;language-text&quot;&gt;&lt;code class=&quot;language-text&quot;&gt;$ patch-package
+patch-package: Applying patches...
+**ERROR** Failed to apply patch for package react-native-google-analytics-bridge&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;In that case you can either add/fix a new patch, if the thing you wanted fixed isn’t in the new version. Or delete the patch file if it is.&lt;/p&gt;
+&lt;h3&gt;A simple solution&lt;/h3&gt;
+&lt;p&gt;What I like about &lt;code class=&quot;language-text&quot;&gt;patch-package&lt;/code&gt; is that you do not depend on external repositories for minor fixes. You’re still installing the official dependency, with all the benefits that entails.&lt;/p&gt;
+&lt;p&gt;And it is good that it doesn’t require any extra steps from your team members. Fix it once, and it happens automatically from there on.&lt;/p&gt;
+&lt;p&gt;Of course, this utility will also work for non-RN projects. Pretty much any project that installs &lt;code class=&quot;language-text&quot;&gt;npm&lt;/code&gt; packages can use it.&lt;/p&gt;
+&lt;p&gt;I hope more people will find this useful, as it has helped me a lot!&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Note:&lt;/strong&gt; This was orginally &lt;a href=&quot;https://blog.novanet.no/easier-react-native-upgrade-with-patch-package/&quot;&gt;posted on the Novanet blog&lt;/a&gt;. Check out that blog for more .NET- and RN-related content.&lt;/p&gt;
+&lt;hr&gt;
+&lt;div class=&quot;footnotes&quot;&gt;
+&lt;hr&gt;
+&lt;ol&gt;
+&lt;li id=&quot;fn-1&quot;&gt;
+&lt;p&gt;  Open source does not work in isolation. If a module isn’t working, submit an issue, and then try to fix the problem yourself. If you fix the problem, submit a pull request. If you can’t figure out the problem, update the issue with details of your investigation into the problem. The people maintaining your dependencies are not paid to do so, so pay them back with a bit of your own time.&lt;/p&gt;
+&lt;a href=&quot;#fnref-1&quot; class=&quot;footnote-backref&quot;&gt;↩&lt;/a&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;</content:encoded></item><item><title><![CDATA[Setup for fast.ai course]]></title><description><![CDATA[Over the summer I looked a bit into practical machine learning, and decided to follow  the fast.ai course . Their emphasis is more on the…]]></description><link>https://cbrevik.com/2017-07-31-setup-for-fast-ai-course/</link><guid isPermaLink="false">https://cbrevik.com/2017-07-31-setup-for-fast-ai-course/</guid><pubDate>Mon, 31 Jul 2017 20:30:00 GMT</pubDate><content:encoded>&lt;p&gt;Over the summer I looked a bit into practical machine learning, and decided to follow &lt;a href=&quot;http://course.fast.ai/&quot;&gt;the fast.ai course&lt;/a&gt;. Their emphasis is more on the code rather than dousing you with heavy maths from the beginning. Which is nice for someone who prefers learning in a practical way, rather than reading dry theory.&lt;/p&gt;
+&lt;p&gt;What follows in this post is a couple of gotchas I encountered while trying to setup AWS and a local installation for this course.&lt;/p&gt;
+&lt;h3&gt;Your AWS instance&lt;/h3&gt;
+&lt;p&gt;So the first thing you learn in the course, is that you have to &lt;a href=&quot;http://wiki.fast.ai/index.php/AWS_install&quot;&gt;set up AWS&lt;/a&gt;. These are quite a few steps, including registering the AWS account, setting up secrets keys, the CLI, and applying for access to the p2.xlarge instance type.&lt;/p&gt;
+&lt;p&gt;You should definitely do this first, because gaining access to the p2.xlarge might take a few days.&lt;/p&gt;
+&lt;p&gt;But, what I do not think is fully explained is the pricing model of AWS. The p2.xlarge instance itself costs $0.9 per hour when running, which is mentioned. But the storage volume will also cost $0.1 per GB/month, regardless if the instance is running or not. On top of that, the elastic IPs you have tied up will cost you $0.005 per hour when the instance is stopped (i.e. most of the time).&lt;/p&gt;
+&lt;p&gt;That can easily cost you an extra ~$15 a month on top of the instance running cost. I don’t feel the course is transparent enough about this.&lt;/p&gt;
+&lt;p&gt;Definitely register the account and apply for the p2.xlarge instance, because you’ll be needing the computing power. But while you’re waiting for the application to be approved, you should set up your environment locally.&lt;/p&gt;
+&lt;p&gt;What I found was that there was a bit of work understanding Jupyter Notebooks, the surrounding libraries, and how to prepare the data before you can even start training your ML model. Learning that stuff while running on an heavy duty AWS instance is a bit redundant, not to mention costly.&lt;/p&gt;
+&lt;h3&gt;Setting up locally&lt;/h3&gt;
+&lt;p&gt;As the guides say for &lt;a href=&quot;http://wiki.fast.ai/index.php/Local_install_(Windows_only:cpu)&quot;&gt;Windows&lt;/a&gt; and &lt;a href=&quot;http://wiki.fast.ai/index.php/Local_install_(OSX_only)&quot;&gt;macOS&lt;/a&gt;, using &lt;a href=&quot;https://www.continuum.io/downloads&quot;&gt;Anaconda&lt;/a&gt; is the easiest (and best) alternative so you can separate your different Python-development environments.&lt;/p&gt;
+&lt;p&gt;After installing Anaconda, setting up an environment for Python then requires running &lt;code class=&quot;language-text&quot;&gt;conda create -n py27 python=2.7 anaconda&lt;/code&gt; in a terminal that supports BASH. The course runs with Python v2.7, but I used Python v3.6 with only minor changes to the code. There are some &lt;a href=&quot;https://conda.io/docs/py2or3.html&quot;&gt;good docs&lt;/a&gt; on setting up the different envs.&lt;/p&gt;
+&lt;p&gt;Next run &lt;code class=&quot;language-text&quot;&gt;source activate py27&lt;/code&gt; in order to run from that environment. Inside the env you can install packages as necessary (&lt;code class=&quot;language-text&quot;&gt;conda install theano&lt;/code&gt;, etc), and run the notebook (&lt;code class=&quot;language-text&quot;&gt;jupyter notebook&lt;/code&gt;).&lt;/p&gt;
+&lt;p&gt;One gotcha for me was that the Jupyter Notebook did not pick up the dependencies I had installed inside my enviromenent. Turns out you have to do &lt;code class=&quot;language-text&quot;&gt;conda install nb_conda&lt;/code&gt; so your Notebook can select a specific environment, and thereby use the correct packages. Spent far too long trying to figure this out.&lt;/p&gt;
+&lt;p&gt;Another gotcha was that I had to install the 1.2.2 version of Keras (&lt;code class=&quot;language-text&quot;&gt;pip install keras==1.2.2&lt;/code&gt; or &lt;code class=&quot;language-text&quot;&gt;pip install git+git://github.com/fchollet/keras.git@1.2.2&lt;/code&gt;), because the provided course notebooks and utils are not compatible with the newer Keras 2.0 API.&lt;/p&gt;
+&lt;p&gt;You will also have to edit the &lt;code class=&quot;language-text&quot;&gt;keras.json&lt;/code&gt; file located in &lt;code class=&quot;language-text&quot;&gt;~/.keras&lt;/code&gt; so you use Theano as the backend for the course:&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;text&quot;&gt;&lt;pre class=&quot;language-text&quot;&gt;&lt;code class=&quot;language-text&quot;&gt;&amp;quot;image_dim_ordering&amp;quot;: &amp;quot;th&amp;quot;
+&amp;quot;backend&amp;quot;: &amp;quot;theano&amp;quot;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This is because the settings will default to Tensorflow.&lt;/p&gt;
+&lt;h3&gt;Fishshell&lt;/h3&gt;
+&lt;p&gt;Minor sidenote for macOS people using &lt;a href=&quot;https://fishshell.com/&quot;&gt;fishshell&lt;/a&gt; (like me). If you want to activate your environment without using BASH, you can add the following to your &lt;code class=&quot;language-text&quot;&gt;~/.config/fish/config.fish&lt;/code&gt;:
+&lt;code class=&quot;language-text&quot;&gt;source (conda info --root)/etc/fish/conf.d/conda.fish&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;This’ll allow you to &lt;code class=&quot;language-text&quot;&gt;activate py27&lt;/code&gt; with fish.&lt;/p&gt;
+&lt;p&gt;Hope this will be of some help to others getting started on this course!&lt;/p&gt;</content:encoded></item><item><title><![CDATA[Intro to React Native (NDC Oslo 2017)]]></title><description><![CDATA[At  NDC Oslo 2017  I held a talk about React Native, which was basically an intro to the technology from a web developers perspective. If…]]></description><link>https://cbrevik.com/2017-07-08-intro-to-react-native/</link><guid isPermaLink="false">https://cbrevik.com/2017-07-08-intro-to-react-native/</guid><pubDate>Sat, 08 Jul 2017 15:02:00 GMT</pubDate><content:encoded>&lt;p&gt;
+  &lt;a
+    class=&quot;gatsby-resp-image-link&quot;
+    href=&quot;/static/DCbzOwlU0AIvrj3-jpg-large-97b6d84570de9e53f8b995a1d0bb461b-3f5a1.jpg&quot;
+    style=&quot;display: block&quot;
+    target=&quot;_blank&quot;
+    rel=&quot;noopener&quot;
+  &gt;
+  
+  &lt;span
+    class=&quot;gatsby-resp-image-wrapper&quot;
+    style=&quot;position: relative; display: block;  max-width: 590px; margin-left: auto; margin-right: auto;&quot;
+  &gt;
+    &lt;span
+      class=&quot;gatsby-resp-image-background-image&quot;
+      style=&quot;padding-bottom: 75%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/jpeg;base64,/9j/2wBDABALDA4MChAODQ4SERATGCgaGBYWGDEjJR0oOjM9PDkzODdASFxOQERXRTc4UG1RV19iZ2hnPk1xeXBkeFxlZ2P/2wBDARESEhgVGC8aGi9jQjhCY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2P/wgARCAAPABQDASIAAhEBAxEB/8QAGAAAAwEBAAAAAAAAAAAAAAAAAAIFAQT/xAAVAQEBAAAAAAAAAAAAAAAAAAADAv/aAAwDAQACEAMQAAABlp2YSThhI//EABoQAAIDAQEAAAAAAAAAAAAAAAABAgMREzH/2gAIAQEAAQUCjU2Otnh2w7bZY9l//8QAFhEAAwAAAAAAAAAAAAAAAAAAARAS/9oACAEDAQE/AZC//8QAFhEAAwAAAAAAAAAAAAAAAAAAARAS/9oACAECAQE/AaK//8QAGhAAAgIDAAAAAAAAAAAAAAAAESEAEAExcf/aAAgBAQAGPwJntODMOkK//8QAGRABAAMBAQAAAAAAAAAAAAAAAQARIUFh/9oACAEBAAE/ITMg8ZDl8iWQUkac+YdgLuLR0bn/2gAMAwEAAgADAAAAEKzf/8QAFhEBAQEAAAAAAAAAAAAAAAAAAREA/9oACAEDAQE/EEFLkjN//8QAGBEBAQADAAAAAAAAAAAAAAAAAQARIUH/2gAIAQIBAT8QF5GzN//EABoQAQEBAQEBAQAAAAAAAAAAAAERACExUdH/2gAIAQEAAT8Q6BElPX1xqWrAFeZXdUROmU4IcykdrpHqSD6z81BPMF7v/9k=&apos;); background-size: cover; display: block;&quot;
+    &gt;
+      &lt;img
+        class=&quot;gatsby-resp-image-image&quot;
+        style=&quot;width: 100%; height: 100%; margin: 0; vertical-align: middle; position: absolute; top: 0; left: 0; box-shadow: inset 0px 0px 0px 400px white;&quot;
+        alt=&quot;Talking at NDC Oslo 2017&quot;
+        title=&quot;&quot;
+        src=&quot;/static/DCbzOwlU0AIvrj3-jpg-large-97b6d84570de9e53f8b995a1d0bb461b-f8fb9.jpg&quot;
+        srcset=&quot;/static/DCbzOwlU0AIvrj3-jpg-large-97b6d84570de9e53f8b995a1d0bb461b-e8976.jpg 148w,
+/static/DCbzOwlU0AIvrj3-jpg-large-97b6d84570de9e53f8b995a1d0bb461b-63df2.jpg 295w,
+/static/DCbzOwlU0AIvrj3-jpg-large-97b6d84570de9e53f8b995a1d0bb461b-f8fb9.jpg 590w,
+/static/DCbzOwlU0AIvrj3-jpg-large-97b6d84570de9e53f8b995a1d0bb461b-85e3d.jpg 885w,
+/static/DCbzOwlU0AIvrj3-jpg-large-97b6d84570de9e53f8b995a1d0bb461b-d1924.jpg 1180w,
+/static/DCbzOwlU0AIvrj3-jpg-large-97b6d84570de9e53f8b995a1d0bb461b-9452e.jpg 1770w,
+/static/DCbzOwlU0AIvrj3-jpg-large-97b6d84570de9e53f8b995a1d0bb461b-3f5a1.jpg 2048w&quot;
+        sizes=&quot;(max-width: 590px) 100vw, 590px&quot;
+      /&gt;
+    &lt;/span&gt;
+  &lt;/span&gt;
+  
+  &lt;/a&gt;
+    &lt;/p&gt;
+&lt;p&gt;At &lt;a href=&quot;http://ndcoslo.com/&quot;&gt;NDC Oslo 2017&lt;/a&gt; I held a talk about React Native, which was basically an intro to the technology from a web developers perspective.&lt;/p&gt;
+&lt;p&gt;If you’re debating which technology to use for your next mobile app, I recommend watching the talk to find out why you might want to choose React Native.&lt;/p&gt;
+&lt;div&gt;
+          &lt;div
+            class=&quot;gatsby-resp-iframe-wrapper&quot;
+            style=&quot;padding-bottom: 56.25%; position: relative; height: 0; overflow: hidden;margin-bottom: 1.0725rem&quot;
+          &gt;
+            &lt;iframe src=&quot;https://www.youtube.com/embed/8ilow_2Ayos&quot; frameborder=&quot;0&quot; allowfullscreen style=&quot;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+          &quot;&gt;&lt;/iframe&gt;
+          &lt;/div&gt;
+          &lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;YouTube: &lt;a href=&quot;https://www.youtube.com/watch?v=8ilow_2Ayos&quot;&gt;https://www.youtube.com/watch?v=8ilow_2Ayos&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Vimeo: &lt;a href=&quot;https://vimeo.com/223985440&quot;&gt;https://vimeo.com/223985440&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Abstract:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Making apps with React Native&lt;/strong&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;blockquote&gt;
+&lt;p&gt;As devices keep getting faster, people come to expect responsive and good-looking mobile apps. With React Native, you can make apps that feel completely native, but are written in JavaScript. That means you can leverage your skills as a web developer, while at the same time re-use pretty much all the code on several platforms.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;blockquote&gt;
+&lt;p&gt;You could write a native app, in a compiled language like Objective-C, C# or Java. But compiling code takes time. With React Native, you don’t have to build the app to see changes. This accelerates the feedback loop, and you’ll be much more productive.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;blockquote&gt;
+&lt;p&gt;In this talk, I’ll introduce you to React Native and lessons learned from using it in production.&lt;/p&gt;
+&lt;/blockquote&gt;</content:encoded></item><item><title><![CDATA[Easy TypeScript with React Native]]></title><description><![CDATA[Just here for the code sample?  Check it out here . Trying to combine  TypeScript  (TS) with  React Native  (RN) has historically been kind…]]></description><link>https://cbrevik.com/2017-05-16-easy-typescript-with-react-native/</link><guid isPermaLink="false">https://cbrevik.com/2017-05-16-easy-typescript-with-react-native/</guid><pubDate>Tue, 16 May 2017 22:03:00 GMT</pubDate><content:encoded>&lt;blockquote&gt;
+&lt;p&gt;Just here for the code sample? &lt;a href=&quot;https://github.com/cbrevik/react-native-typescript-starter&quot;&gt;Check it out here&lt;/a&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Trying to combine &lt;a href=&quot;https://github.com/Microsoft/TypeScript&quot;&gt;TypeScript&lt;/a&gt; (TS) with &lt;a href=&quot;https://github.com/facebook/react-native&quot;&gt;React Native&lt;/a&gt; (RN) has historically been kind of difficult. It has been possible by employing some clever, but hacky, solutions. The problem is, that those solutions are difficult to maintain. And they might become more cumbersome with every RN release, since they are unsupported.&lt;/p&gt;
+&lt;p&gt;Using features which makes creating RN apps enjoyable, like Hot-Module Reloading (HMR), has also been a pain. Why this is may be a boring implementation detail. But suffice it to say, it has to do with the RN packager only watching &lt;code class=&quot;language-text&quot;&gt;js&lt;/code&gt; and &lt;code class=&quot;language-text&quot;&gt;json&lt;/code&gt; files. Updates to code files with other extensions do not trigger a reload.&lt;/p&gt;
+&lt;p&gt;Now though, with the forthcoming release of RN &lt;code class=&quot;language-text&quot;&gt;v0.45.0&lt;/code&gt; you’ll have a better alternative. A &lt;a href=&quot;https://github.com/facebook/react-native/pull/13689&quot;&gt;newly landed PR&lt;/a&gt; (by &lt;a href=&quot;https://github.com/ds300&quot;&gt;David Sheldrick&lt;/a&gt;) allows you to customise which extension the packager should watch.&lt;/p&gt;
+&lt;p&gt;The other piece of the puzzle, is that we need to compile TS down to JavaScript (JS) for the RN packager to pick up. Instead of doing this manually (either through &lt;code class=&quot;language-text&quot;&gt;tsc&lt;/code&gt; or hooking it up with &lt;code class=&quot;language-text&quot;&gt;npm&lt;/code&gt; scripts), we want this to happen automatically as part of a normal &lt;code class=&quot;language-text&quot;&gt;react-native start&lt;/code&gt; command.&lt;/p&gt;
+&lt;p&gt;RN already provides the ability to hook in your own transformer through &lt;code class=&quot;language-text&quot;&gt;react-native start --transformer ./path/to/transformer.js&lt;/code&gt;. But it turns out you can actually do one better by supplying your own &lt;code class=&quot;language-text&quot;&gt;rn-cli.config.js&lt;/code&gt; and defining it there.&lt;/p&gt;
+&lt;p&gt;And you won’t even have to write your own transformer, since David comes to the rescue here again with his &lt;a href=&quot;https://github.com/ds300/react-native-typescript-transformer&quot;&gt;react-native-typescript-transfomer&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;For simplity’s sake I’ll echo his installation instructions here. In your RN project folder, run:&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;bash&quot;&gt;&lt;pre class=&quot;language-bash&quot;&gt;&lt;code class=&quot;language-bash&quot;&gt;yarn add --dev react-native-typescript-transformer typescript&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Next, in your project root, create a &lt;code class=&quot;language-text&quot;&gt;rn-cli.config.js&lt;/code&gt; file, and add the following&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;javascript&quot;&gt;&lt;pre class=&quot;language-javascript&quot;&gt;&lt;code class=&quot;language-javascript&quot;&gt;module&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;exports &lt;span class=&quot;token operator&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;token function&quot;&gt;getTransformModulePath&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;token keyword&quot;&gt;return&lt;/span&gt; require&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;resolve&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token string&quot;&gt;&apos;react-native-typescript-transformer&apos;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;
+  &lt;span class=&quot;token function&quot;&gt;getSourceExts&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;token keyword&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;token string&quot;&gt;&apos;ts&apos;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;token string&quot;&gt;&apos;tsx&apos;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;]&lt;/span&gt;
+  &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;As you can see, here you’re setting the transformer to use (so you can just run &lt;code class=&quot;language-text&quot;&gt;react-native start&lt;/code&gt;). You’re also adding your custom source extensions which will (along with &lt;code class=&quot;language-text&quot;&gt;js&lt;/code&gt; and &lt;code class=&quot;language-text&quot;&gt;json&lt;/code&gt;) be picked up by the RN packager.&lt;/p&gt;
+&lt;p&gt;You’ll also need a &lt;code class=&quot;language-text&quot;&gt;tsconfig.json&lt;/code&gt; file for the TS compiler with the following settings (in your project root):&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;json&quot;&gt;&lt;pre class=&quot;language-json&quot;&gt;&lt;code class=&quot;language-json&quot;&gt;&lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;token property&quot;&gt;&quot;compilerOptions&quot;&lt;/span&gt;&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;token property&quot;&gt;&quot;target&quot;&lt;/span&gt;&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token string&quot;&gt;&quot;es2015&quot;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;token property&quot;&gt;&quot;module&quot;&lt;/span&gt;&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token string&quot;&gt;&quot;es2015&quot;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;token property&quot;&gt;&quot;jsx&quot;&lt;/span&gt;&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token string&quot;&gt;&quot;react-native&quot;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;token property&quot;&gt;&quot;moduleResolution&quot;&lt;/span&gt;&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token string&quot;&gt;&quot;node&quot;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;token property&quot;&gt;&quot;allowSyntheticDefaultImports&quot;&lt;/span&gt;&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token boolean&quot;&gt;true&lt;/span&gt;
+  &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;That should be all you need to get the RN packager to pick up your TS source files, and compile them automatically to JS.&lt;/p&gt;
+&lt;p&gt;This works with HMR, proper source maps and debugging, and everything else you come to expect from building an RN app!&lt;/p&gt;
+&lt;p&gt;To get you started with the actual coding, I’ve also made a simple Counter-app (starter) project with Redux: &lt;a href=&quot;https://github.com/cbrevik/react-native-typescript-starter&quot;&gt;react-native-typescript-starter&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Note:&lt;/strong&gt; This was orginally &lt;a href=&quot;http://blog.novanet.no/easy-typescript-with-react-native/&quot;&gt;posted on the Novanet blog&lt;/a&gt;. Check out that blog for more .NET-related content.&lt;/p&gt;</content:encoded></item><item><title><![CDATA[You should check out Yarn]]></title><description><![CDATA[Not too long ago, Facebook announced  Yarn , a new package manager for JavaScript. Yarn has been developed as an alternative to npm…]]></description><link>https://cbrevik.com/2016-10-24-you-should-check-out-yarn/</link><guid isPermaLink="false">https://cbrevik.com/2016-10-24-you-should-check-out-yarn/</guid><pubDate>Mon, 24 Oct 2016 09:27:00 GMT</pubDate><content:encoded>&lt;p&gt;Not too long ago, Facebook announced &lt;a href=&quot;https://github.com/yarnpkg/yarn&quot;&gt;Yarn&lt;/a&gt;, a new package manager for JavaScript. Yarn has been developed as an alternative to npm, addressing some shortcomings the latter tool has.&lt;/p&gt;
+&lt;p&gt;I know what you’re thinking, “Yet another new tooling in the JS ecosystem?”, and “Weren’t we just done deprecating bower?“.&lt;sup id=&quot;fnref-1&quot;&gt;&lt;a href=&quot;#fn-1&quot; class=&quot;footnote-ref&quot;&gt;1&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;
+&lt;p&gt;But, hold your self-diagnosed JavaScript fatigue! Here’s few reasons why you should check out Yarn;&lt;/p&gt;
+&lt;h2&gt;Deterministic installs&lt;/h2&gt;
+&lt;p&gt;What exactly does “deterministic” mean in this context, and why should you care? According to definition a “deterministic algorithm” would, given a particular input, always produce the same output.&lt;/p&gt;
+&lt;p&gt;Sometimes npm might introduce a sneaky bug in this regard. It does not always, given the same &lt;code class=&quot;language-text&quot;&gt;package.json&lt;/code&gt; (&lt;em&gt;input&lt;/em&gt;), install the same versions of your dependencies (&lt;em&gt;output&lt;/em&gt;). This is because of how npm resolves dependencies.&lt;/p&gt;
+&lt;p&gt;Say you depend on &lt;code class=&quot;language-text&quot;&gt;&amp;quot;foo-module&amp;quot;: &amp;quot;^2.6.0&amp;quot;&lt;/code&gt; in your &lt;code class=&quot;language-text&quot;&gt;package.json&lt;/code&gt;. Here the caret (&lt;code class=&quot;language-text&quot;&gt;^&lt;/code&gt;) in front of the version number means that when you run &lt;code class=&quot;language-text&quot;&gt;npm install&lt;/code&gt;, it will install the newest &lt;code class=&quot;language-text&quot;&gt;2.x.x&lt;/code&gt; version of &lt;code class=&quot;language-text&quot;&gt;foo-module&lt;/code&gt;. But it will only do this if your &lt;code class=&quot;language-text&quot;&gt;node_modules&lt;/code&gt; folder does not already contain a &lt;code class=&quot;language-text&quot;&gt;2.x.x&lt;/code&gt; version of this module.&lt;/p&gt;
+&lt;p&gt;What if a new &lt;code class=&quot;language-text&quot;&gt;2.x.x&lt;/code&gt; version has been released in the interim between you installing the dependencies on your machine, and another colleague on their machine? This fact may lead to you, and your colleagues, and your build servers having completely different versions of packages installed.&lt;/p&gt;
+&lt;p&gt;Imagine there’s a bug in the newest version of &lt;code class=&quot;language-text&quot;&gt;foo-module&lt;/code&gt;. It works on certain machines, but not others. In this scenario you may have a difficult time discovering where the bug is. Worse if it happens at the end of a deploy pipeline.&lt;/p&gt;
+&lt;p&gt;Even if you don’t use version number ranges in your &lt;code class=&quot;language-text&quot;&gt;package.json&lt;/code&gt;, the deps of your deps&lt;sup id=&quot;fnref-2&quot;&gt;&lt;a href=&quot;#fn-2&quot; class=&quot;footnote-ref&quot;&gt;2&lt;/a&gt;&lt;/sup&gt; might.&lt;/p&gt;
+&lt;p&gt;Yarn fixes this with the help of a file called &lt;code class=&quot;language-text&quot;&gt;yarn.lock&lt;/code&gt;. This file is generated by default, and it will lock down the specific versions to be installed. Of course this file must be checked in along with the rest of your code, so your colleagues and build servers can use it.&lt;/p&gt;
+&lt;p&gt;Lockfiles aren’t anything new, several other package managers use them (with good reason). Even npm has &lt;code class=&quot;language-text&quot;&gt;shrinkwrap&lt;/code&gt; for this purpose. But the difference is that with Yarn the lockfile is updated automatically, whilst with npm you will have to remember to manually run &lt;code class=&quot;language-text&quot;&gt;shrinkwrap&lt;/code&gt;.&lt;/p&gt;
+&lt;h2&gt;Much faster installs&lt;/h2&gt;
+&lt;p&gt;Another benefit of having a lockfile is that Yarn knows exactly which dependencies to fetch. Even if your &lt;code class=&quot;language-text&quot;&gt;package.json&lt;/code&gt; says &lt;code class=&quot;language-text&quot;&gt;^2.6.0&lt;/code&gt; (&lt;code class=&quot;language-text&quot;&gt;2.x.x&lt;/code&gt;), your lockfile will nail it down to a very specific version, say &lt;code class=&quot;language-text&quot;&gt;2.6.2&lt;/code&gt;. This fact means that Yarn doesn’t have to do anything fancy before it starts to fetch packages. In fact it can start right away, parallelize requests, and effectively utilize your bandwidth.&lt;/p&gt;
+&lt;p&gt;Yarn also keeps a global offline cache of the packages, which means that it will only hit the network when it truly needs to. Both of these improvements mean a &lt;a href=&quot;http://yarnpkg.com/en/compare&quot;&gt;huge&lt;/a&gt; &lt;a href=&quot;https://medium.freecodecamp.com/npm-vs-yarn-benchmark-9b456de4aa96&quot;&gt;speed-up&lt;/a&gt; in terms of install time.&lt;/p&gt;
+&lt;p&gt;Even if you don’t care about anything else regarding Yarn, you will definitely notice the difference in install time. The global package cache is also a benefit to developers who have to work offline, or in low-bandwidth environments.&lt;/p&gt;
+&lt;p&gt;Of course, there’s one potential downside; you will no longer have an excuse to go get coffee because of &lt;code class=&quot;language-text&quot;&gt;npm install&lt;/code&gt;.&lt;/p&gt;
+&lt;h2&gt;What else?&lt;/h2&gt;
+&lt;p&gt;Yarn supports both the npm and bower registries, which means you will not have to “migrate” your &lt;code class=&quot;language-text&quot;&gt;package.json&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;It supports &lt;a href=&quot;https://yarnpkg.com/en/docs/cli/&quot;&gt;most of the commands&lt;/a&gt; that npm does, with certain things renamed. For example &lt;code class=&quot;language-text&quot;&gt;npm install --save foo-module&lt;/code&gt; has become &lt;code class=&quot;language-text&quot;&gt;yarn add foo-module&lt;/code&gt;. While &lt;code class=&quot;language-text&quot;&gt;npm install&lt;/code&gt; is just &lt;code class=&quot;language-text&quot;&gt;yarn&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Yarn is open source, more secure, and with several big industry players behind it. Even the &lt;a href=&quot;http://blog.npmjs.org/post/151660845210/hello-yarn&quot;&gt;npm folks&lt;/a&gt; have been pretty nice about the announcement.&lt;/p&gt;
+&lt;p&gt;I believe Yarn is one of the better tools to be introduced in the JavaScript ecosystem, and you should totally &lt;a href=&quot;https://yarnpkg.com/en/docs/install&quot;&gt;check it out.&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Note:&lt;/strong&gt; This was orginally &lt;a href=&quot;http://blog.novanet.no/you-should-check-out-yarn/&quot;&gt;posted on the Novanet blog&lt;/a&gt;. Check out that blog for more .NET-related content[.]&lt;/p&gt;
+&lt;div class=&quot;footnotes&quot;&gt;
+&lt;hr&gt;
+&lt;ol&gt;
+&lt;li id=&quot;fn-1&quot;&gt;
+&lt;p&gt;Okay, that might have been uncalled for.&lt;/p&gt;
+&lt;a href=&quot;#fnref-1&quot; class=&quot;footnote-backref&quot;&gt;↩&lt;/a&gt;
+&lt;/li&gt;
+&lt;li id=&quot;fn-2&quot;&gt;
+&lt;p&gt;  Dependencies of your dependencies. It’s dependencies all the way down folks.&lt;/p&gt;
+&lt;a href=&quot;#fnref-2&quot; class=&quot;footnote-backref&quot;&gt;↩&lt;/a&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;</content:encoded></item><item><title><![CDATA[Google Tag Manager and A/B-testing with React Native]]></title><description><![CDATA[It’s kind of funny how sometimes an open source project never really stops evolving. It definitely should though, don’t get me wrong. There…]]></description><link>https://cbrevik.com/2016-04-24-gtm-ab-testing/</link><guid isPermaLink="false">https://cbrevik.com/2016-04-24-gtm-ab-testing/</guid><pubDate>Sun, 24 Apr 2016 14:42:00 GMT</pubDate><content:encoded>&lt;p&gt;It’s kind of funny how sometimes an open source project never really stops evolving.&lt;/p&gt;
+&lt;p&gt;It definitely should though, don’t get me wrong. There is value in saying a project is “done”. But, my &lt;a href=&quot;https://github.com/idehub/react-native-google-analytics-bridge&quot;&gt;React Native bridge for Google Analytics&lt;/a&gt; isn’t quite there yet.&lt;/p&gt;
+&lt;p&gt;In the latest version I have added a simple Google Tag Manager (GTM) implementation which allows you to retrieve values from a container.
+The added benefit here is that you can connect your GTM containers to your Google Analytics (GA) views, and perform “Content Experiments”. In other words, A/B-testing.&lt;/p&gt;
+&lt;p&gt;The guide from Google on how to do the above can be found &lt;a href=&quot;https://support.google.com/tagmanager/answer/6003007&quot;&gt;here&lt;/a&gt;. And while it seems comprehensive it is really quite simple.&lt;/p&gt;
+&lt;p&gt;What you do, after linking your GTM and GA, is setup a “Google Analytics Content Experiment” at GTM, with a specific goal (defined at your GA view) as the experiment objective.&lt;/p&gt;
+&lt;p&gt;At the same time you also define experiment variations (in JSON) which will serve as the A/B testing parameters. It might look something like:
+
+  &lt;a
+    class=&quot;gatsby-resp-image-link&quot;
+    href=&quot;/static/Screen-Shot-2016-04-24-at-14-14-35-37cfab24037ac9d2f37c559687789028-9c63f.png&quot;
+    style=&quot;display: block&quot;
+    target=&quot;_blank&quot;
+    rel=&quot;noopener&quot;
+  &gt;
+  
+  &lt;span
+    class=&quot;gatsby-resp-image-wrapper&quot;
+    style=&quot;position: relative; display: block;  max-width: 590px; margin-left: auto; margin-right: auto;&quot;
+  &gt;
+    &lt;span
+      class=&quot;gatsby-resp-image-background-image&quot;
+      style=&quot;padding-bottom: 22.96819787985866%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAFCAYAAABFA8wzAAAACXBIWXMAABYlAAAWJQFJUiTwAAAAlUlEQVQY022QCQrFIAxEvf9Vq61LW+v+eQFL4SsMmSRjJkQ554b3XgDPOY/ruiQ/z/NFCGHc9y0cHZre+x8UohijiEEpZcwan57nERNQa5WYUhLd6ik2wR3AEW/bJsOMMRJ5rbUXbELE4AtqauXCYGvtOI7jNWP4vu9Sm72Za63lDOjU6g402GzeDcC/N519OAuQo/sBE/mFBWZGle0AAAAASUVORK5CYII=&apos;); background-size: cover; display: block;&quot;
+    &gt;
+      &lt;img
+        class=&quot;gatsby-resp-image-image&quot;
+        style=&quot;width: 100%; height: 100%; margin: 0; vertical-align: middle; position: absolute; top: 0; left: 0; box-shadow: inset 0px 0px 0px 400px white;&quot;
+        alt=&quot;Content Experiment variations&quot;
+        title=&quot;&quot;
+        src=&quot;/static/Screen-Shot-2016-04-24-at-14-14-35-37cfab24037ac9d2f37c559687789028-fb8a0.png&quot;
+        srcset=&quot;/static/Screen-Shot-2016-04-24-at-14-14-35-37cfab24037ac9d2f37c559687789028-1a291.png 148w,
+/static/Screen-Shot-2016-04-24-at-14-14-35-37cfab24037ac9d2f37c559687789028-2bc4a.png 295w,
+/static/Screen-Shot-2016-04-24-at-14-14-35-37cfab24037ac9d2f37c559687789028-fb8a0.png 590w,
+/static/Screen-Shot-2016-04-24-at-14-14-35-37cfab24037ac9d2f37c559687789028-526de.png 885w,
+/static/Screen-Shot-2016-04-24-at-14-14-35-37cfab24037ac9d2f37c559687789028-9c63f.png 1132w&quot;
+        sizes=&quot;(max-width: 590px) 100vw, 590px&quot;
+      /&gt;
+    &lt;/span&gt;
+  &lt;/span&gt;
+  
+  &lt;/a&gt;
+    &lt;/p&gt;
+&lt;p&gt;In this scenario, your users will be given either the &lt;code class=&quot;language-text&quot;&gt;A_pack&lt;/code&gt; or &lt;code class=&quot;language-text&quot;&gt;B_pack&lt;/code&gt; by GTM. The values from the JSON are then the same values which can be retrieved from the GTM container on the device.&lt;/p&gt;
+&lt;p&gt;Here is where my library comes in. With the newest version, retrieving parameters from the container can be done as simple as:&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;javascript&quot;&gt;&lt;pre class=&quot;language-javascript&quot;&gt;&lt;code class=&quot;language-javascript&quot;&gt;&lt;span class=&quot;token keyword&quot;&gt;import&lt;/span&gt; GoogleAnalytics&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+  GoogleTagManager&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;token keyword&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;token string&quot;&gt;&apos;react-native-google-analytics-bridge&apos;&lt;/span&gt;
+GoogleTagManager&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;openContainerWithId&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token string&quot;&gt;&apos;GT-NZT48&apos;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;then&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;token operator&quot;&gt;=&gt;&lt;/span&gt; GoogleTagManager&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;stringForKey&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token string&quot;&gt;&apos;pack&apos;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;then&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;str &lt;span class=&quot;token operator&quot;&gt;=&gt;&lt;/span&gt; console&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token string&quot;&gt;&apos;Pack: &apos;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt; str&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;You can then use these parameters to change the app experience/flow depending on what you are attempting to test.&lt;/p&gt;
+&lt;p&gt;The experiment objective in the scenario above is linked to a goal which triggers on my Ecommerce/Purchase event:
+
+  &lt;a
+    class=&quot;gatsby-resp-image-link&quot;
+    href=&quot;/static/Screen-Shot-2016-04-24-at-14-33-59-b37f97c458d727712790e59bf785e39b-59197.png&quot;
+    style=&quot;display: block&quot;
+    target=&quot;_blank&quot;
+    rel=&quot;noopener&quot;
+  &gt;
+  
+  &lt;span
+    class=&quot;gatsby-resp-image-wrapper&quot;
+    style=&quot;position: relative; display: block;  max-width: 590px; margin-left: auto; margin-right: auto;&quot;
+  &gt;
+    &lt;span
+      class=&quot;gatsby-resp-image-background-image&quot;
+      style=&quot;padding-bottom: 82.99319727891157%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAARCAYAAADdRIy+AAAACXBIWXMAABYlAAAWJQFJUiTwAAAB9klEQVQ4y52U2YrbQBBF9f8QyHsI5BfyHWHIwwgv8iZbtnZrs6zV0k3fmvSMPUOIkoaiF3WdvrXYxtfnL7B8C6EXwg98HA4HNE2DruvQti04xnHE1GH8DJ7gnl2cnBM8z4Nt20iSBNfrFXme43a7vUKngA2oO8NtQFVVqOtaAIRR4eVyQd/3/6TS+Pz0CabzDGfnYGfvsNlsxNbr9SucD02FGt7FR5IniKNYQo2iCEEQII5jZFn2Iey/h6xGqxQEYSjANE0FRlUsCk2DJgG/mzHcpERZ5MiUGgLLsny4pAsyxYxvPyLMbB/2dgN7v8dsNpNK/++QkLM0wXa7xfF4lHm5XCJUKdC9yPDZm7SHvZq7Vp01NerqpXgGs8KWIYC5O5/PMrMwLJAuFM94h+uXfaT2Ebw4wylKEZxT4YjCYRikkloR17R7Nfo7+7JpWjmrlRV1j7zqUXfDW8gkUxFbhGv+/LhnY3MQQqVUT3V8aFAFoJBxYEu9dYEA2bzMH53Ye4vFQqAMk05Uw3C1UTUfoWIa1Y/3wKIoBMgPVDWfz6XSGkgnghzHkbaiI4G8r+cHhXyRfwwablmWPEBnnV/2ps6lhvwRSMhe9SAH82iaJlarlagkiE5MBVPD9b3pkD8oZHh67bquFIVhEkKVPKfz+LsY700DfwH6giQjzxX1pwAAAABJRU5ErkJggg==&apos;); background-size: cover; display: block;&quot;
+    &gt;
+      &lt;img
+        class=&quot;gatsby-resp-image-image&quot;
+        style=&quot;width: 100%; height: 100%; margin: 0; vertical-align: middle; position: absolute; top: 0; left: 0; box-shadow: inset 0px 0px 0px 400px white;&quot;
+        alt=&quot;Ecommerce Purchase goal setup&quot;
+        title=&quot;&quot;
+        src=&quot;/static/Screen-Shot-2016-04-24-at-14-33-59-b37f97c458d727712790e59bf785e39b-fb8a0.png&quot;
+        srcset=&quot;/static/Screen-Shot-2016-04-24-at-14-33-59-b37f97c458d727712790e59bf785e39b-1a291.png 148w,
+/static/Screen-Shot-2016-04-24-at-14-33-59-b37f97c458d727712790e59bf785e39b-2bc4a.png 295w,
+/static/Screen-Shot-2016-04-24-at-14-33-59-b37f97c458d727712790e59bf785e39b-fb8a0.png 590w,
+/static/Screen-Shot-2016-04-24-at-14-33-59-b37f97c458d727712790e59bf785e39b-59197.png 882w&quot;
+        sizes=&quot;(max-width: 590px) 100vw, 590px&quot;
+      /&gt;
+    &lt;/span&gt;
+  &lt;/span&gt;
+  
+  &lt;/a&gt;
+    &lt;/p&gt;
+&lt;p&gt;So all I need to do in order to in order to say that a goal has been completed for a specific user, is to track this event through my library:&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;javascript&quot;&gt;&lt;pre class=&quot;language-javascript&quot;&gt;&lt;code class=&quot;language-javascript&quot;&gt;GoogleAnalytics&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;trackEvent&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token string&quot;&gt;&apos;Ecommerce&apos;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;token string&quot;&gt;&apos;Purchase&apos;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Eventually the experiment will announce a winner between my &lt;code class=&quot;language-text&quot;&gt;A_pack&lt;/code&gt; and &lt;code class=&quot;language-text&quot;&gt;B_pack&lt;/code&gt; (in my GA view under Behavior -&gt; Experiements), and the A/B-testing for this scenario is concluded.&lt;/p&gt;
+&lt;p&gt;Hope this blog post has been helpful, visit the &lt;a href=&quot;https://github.com/idehub/react-native-google-analytics-bridge&quot;&gt;Github repo&lt;/a&gt; for an installation guide and API.&lt;/p&gt;</content:encoded></item><item><title><![CDATA[React Native InApp Billing]]></title><description><![CDATA[I just released v1.0 of my  React Native Billing  library. Sometimes the things you make for your own needs, is useful for other people as…]]></description><link>https://cbrevik.com/2016-02-09-react-native-inapp-billing/</link><guid isPermaLink="false">https://cbrevik.com/2016-02-09-react-native-inapp-billing/</guid><pubDate>Tue, 09 Feb 2016 19:55:00 GMT</pubDate><content:encoded>&lt;p&gt;I just released v1.0 of my &lt;a href=&quot;https://github.com/idehub/react-native-billing&quot;&gt;React Native Billing&lt;/a&gt; library. Sometimes the things you make for your own needs, is useful for other people as well!&lt;/p&gt;
+&lt;p&gt;The library came about because I needed InApp Billing support in an Android app made with React Native. Since there was no other Billing-plugins available, I just implemented a simple bridge for the app, wrapping the excellent &lt;a href=&quot;https://github.com/anjlab/android-inapp-billing-v3&quot;&gt;anjlab InApp&lt;/a&gt; library.&lt;/p&gt;
+&lt;p&gt;Later on, I noticed people on the &lt;a href=&quot;http://www.reactiflux.com/&quot;&gt;reactiflux&lt;/a&gt; chat asking for an InApp Billing implementation, and decided to release my own simple bridge.&lt;/p&gt;
+&lt;p&gt;This has been much improved upon since, with stability improvements and a much &lt;a href=&quot;https://github.com/idehub/react-native-billing#javascript-api&quot;&gt;larger API&lt;/a&gt;. You do not need much JavaScript-code to use the API:&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;javascript&quot;&gt;&lt;pre class=&quot;language-javascript&quot;&gt;&lt;code class=&quot;language-javascript&quot;&gt;&lt;span class=&quot;token keyword&quot;&gt;const&lt;/span&gt; InAppBilling &lt;span class=&quot;token operator&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token function&quot;&gt;require&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token string&quot;&gt;&apos;react-native-billing&apos;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+
+InAppBilling&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;open&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;then&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;token operator&quot;&gt;=&gt;&lt;/span&gt; InAppBilling&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;purchase&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token string&quot;&gt;&apos;android.test.purchased&apos;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;then&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;details &lt;span class=&quot;token operator&quot;&gt;=&gt;&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+    console&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token string&quot;&gt;&apos;You purchased: &apos;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt; details&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;token keyword&quot;&gt;return&lt;/span&gt; InAppBilling&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;close&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token keyword&quot;&gt;catch&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;err &lt;span class=&quot;token operator&quot;&gt;=&gt;&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+    console&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;err&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;In order to begin any operation that calls the Google Play API, like &lt;code class=&quot;language-text&quot;&gt;purchase&lt;/code&gt; or &lt;code class=&quot;language-text&quot;&gt;getProductDetails&lt;/code&gt;, you will need to call &lt;code class=&quot;language-text&quot;&gt;open()&lt;/code&gt;. This is in order to open the service channel to Google Play.&lt;/p&gt;
+&lt;p&gt;After that, you can call for example &lt;code class=&quot;language-text&quot;&gt;purchase&lt;/code&gt;, and deal with the response. Since every operation returns a Promise, you may also string several operations after one another.&lt;/p&gt;
+&lt;p&gt;Finally, you will have to call &lt;code class=&quot;language-text&quot;&gt;close()&lt;/code&gt; after you are done. This is very important since failure to close the Google Play service channel may degrade the performance of the app.&lt;/p&gt;
+&lt;p&gt;Quite simple! Visit the &lt;a href=&quot;https://github.com/idehub/react-native-billing&quot;&gt;Github repo&lt;/a&gt; for an installation guide and API.&lt;/p&gt;</content:encoded></item><item><title><![CDATA[Google Analytics on React Native]]></title><description><![CDATA[Over the Christmas weekend I decided to sit down and finally write a  React Native bridge for Google Analytics .
+The pure JavaScript variant…]]></description><link>https://cbrevik.com/2015-12-30-google-analytics-on-react-native/</link><guid isPermaLink="false">https://cbrevik.com/2015-12-30-google-analytics-on-react-native/</guid><pubDate>Wed, 30 Dec 2015 10:33:00 GMT</pubDate><content:encoded>&lt;p&gt;Over the Christmas weekend I decided to sit down and finally write a &lt;a href=&quot;https://github.com/idehub/react-native-google-analytics-bridge&quot;&gt;React Native bridge for Google Analytics&lt;/a&gt;.
+The pure JavaScript variant already exists as an excellent library &lt;a href=&quot;https://github.com/lwansbrough/react-native-google-analytics&quot;&gt;made by lwansbrough&lt;/a&gt;, so why make a native bridge?&lt;/p&gt;
+&lt;p&gt;The key difference is that with this native bridge you get a lot of the metadata handled automatically by the Google Analytics library. This will include the device UUID, device model, viewport size, OS version, etc.
+With the pure JavaScript variant you will have to pull this information out via a native bridge from the device (e.g. &lt;a href=&quot;https://github.com/rebeccahughes/react-native-device-info&quot;&gt;with rebeccahughes’ DeviceInfo&lt;/a&gt; in order to track it.&lt;/p&gt;
+&lt;p&gt;With the native library you will only have to send in a few parameteres when tracking, e.g:&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;javascript&quot;&gt;&lt;pre class=&quot;language-javascript&quot;&gt;&lt;code class=&quot;language-javascript&quot;&gt;&lt;span class=&quot;token keyword&quot;&gt;const&lt;/span&gt; GoogleAnalytics &lt;span class=&quot;token operator&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token function&quot;&gt;require&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token string&quot;&gt;&apos;react-native-google-analytics-bridge&apos;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+
+GoogleAnalytics&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;trackScreenView&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token string&quot;&gt;&apos;Home&apos;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+GoogleAnalytics&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;trackEvent&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token string&quot;&gt;&apos;testcategory&apos;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;token string&quot;&gt;&apos;testaction&apos;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Visit the &lt;a href=&quot;https://github.com/idehub/react-native-google-analytics-bridge#installation-with-rnpm&quot;&gt;Github repo&lt;/a&gt; for an installation guide and API.&lt;/p&gt;</content:encoded></item><item><title><![CDATA[New Beginnings]]></title><description><![CDATA[Far far away, behind the word mountains, far from the countries Vokalia and
+Consonantia, there live the blind texts. Separated they live in…]]></description><link>https://cbrevik.com/hi-folks/</link><guid isPermaLink="false">https://cbrevik.com/hi-folks/</guid><pubDate>Thu, 28 May 2015 22:40:32 GMT</pubDate><content:encoded>&lt;p&gt;Far far away, behind the word mountains, far from the countries Vokalia and
+Consonantia, there live the blind texts. Separated they live in Bookmarksgrove
+right at the coast of the Semantics, a large language ocean. A small river named
+Duden flows by their place and supplies it with the necessary regelialia.&lt;/p&gt;
+&lt;h2&gt;On deer horse aboard tritely yikes and much&lt;/h2&gt;
+&lt;p&gt;The Big Oxmox advised her not to do so, because there were thousands of bad
+Commas, wild Question Marks and devious Semikoli, but the Little Blind Text
+didn’t listen. She packed her seven versalia, put her initial into the belt and
+made herself on the way.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;This however showed weasel&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Well uncritical so misled&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;this is very interesting&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Goodness much until that fluid owl&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;When she reached the first hills of the &lt;strong&gt;Italic Mountains&lt;/strong&gt;, she had a last
+view back on the skyline of her hometown &lt;em&gt;Bookmarksgrove&lt;/em&gt;, the headline of
+&lt;a href=&quot;http://google.com&quot;&gt;Alphabet Village&lt;/a&gt; and the subline of her own road, the Line
+Lane. Pityful a rethoric question ran over her cheek, then she continued her
+way. On her way she met a copy.&lt;/p&gt;
+&lt;h3&gt;Overlaid the jeepers uselessly much excluding&lt;/h3&gt;
+&lt;p&gt;But nothing the copy said could convince her and so it didn’t take long until a
+few insidious Copy Writers ambushed her, made her drunk with
+&lt;a href=&quot;http://google.com&quot;&gt;Longe and Parole&lt;/a&gt; and dragged her into their agency, where
+they abused her for their projects again and again. And if she hasn’t been
+rewritten, then they are still using her.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Far far away, behind the word mountains, far from the countries Vokalia and
+Consonantia, there live the blind texts. Separated they live in Bookmarksgrove
+right at the coast of the Semantics, a large language ocean.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;It is a paradisematic country, in which roasted parts of sentences fly into your
+mouth. Even the all-powerful Pointing has no control about the blind texts it is
+an almost unorthographic life One day however a small line of blind text by the
+name of Lorem Ipsum decided to leave for the far World of Grammar.&lt;/p&gt;
+&lt;h3&gt;According a funnily until pre-set or arrogant well cheerful&lt;/h3&gt;
+&lt;p&gt;The Big Oxmox advised her not to do so, because there were thousands of bad
+Commas, wild Question Marks and devious Semikoli, but the Little Blind Text
+didn’t listen. She packed her seven versalia, put her initial into the belt and
+made herself on the way.&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;So baboon this&lt;/li&gt;
+&lt;li&gt;Mounted militant weasel gregariously admonishingly straightly hey&lt;/li&gt;
+&lt;li&gt;Dear foresaw hungry and much some overhung&lt;/li&gt;
+&lt;li&gt;Rash opossum less because less some amid besides yikes jeepers frenetic
+impassive fruitlessly shut&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;When she reached the first hills of the Italic Mountains, she had a last view
+back on the skyline of her hometown Bookmarksgrove, the headline of Alphabet
+Village and the subline of her own road, the Line Lane. Pityful a rethoric
+question ran over her cheek, then she continued her way. On her way she met a
+copy.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The copy warned the Little Blind Text, that where it came from it would have
+been rewritten a thousand times and everything that was left from its origin
+would be the word “and” and the Little Blind Text should turn around and
+return to its own, safe country.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;But nothing the copy said could convince her and so it didn’t take long until a
+few insidious Copy Writers ambushed her, made her drunk with Longe and Parole
+and dragged her into their agency, where they abused her for their projects
+again and again. And if she hasn’t been rewritten, then they are still using
+her. Far far away, behind the word mountains, far from the countries Vokalia and
+Consonantia, there live the blind texts.&lt;/p&gt;
+&lt;h4&gt;Silent delightfully including because before one up barring chameleon&lt;/h4&gt;
+&lt;p&gt;Separated they live in Bookmarksgrove right at the coast of the Semantics, a
+large language ocean. A small river named Duden flows by their place and
+supplies it with the necessary regelialia. It is a paradisematic country, in
+which roasted parts of sentences fly into your mouth.&lt;/p&gt;
+&lt;p&gt;Even the all-powerful Pointing has no control about the blind texts it is an
+almost unorthographic life One day however a small line of blind text by the
+name of Lorem Ipsum decided to leave for the far World of Grammar. The Big Oxmox
+advised her not to do so, because there were thousands of bad Commas, wild
+Question Marks and devious Semikoli, but the Little Blind Text didn’t listen.&lt;/p&gt;
+&lt;h5&gt;Wherever far wow thus a squirrel raccoon jeez jaguar this from along&lt;/h5&gt;
+&lt;p&gt;She packed her seven versalia, put her initial into the belt and made herself on
+the way. When she reached the first hills of the Italic Mountains, she had a
+last view back on the skyline of her hometown Bookmarksgrove, the headline of
+Alphabet Village and the subline of her own road, the Line Lane. Pityful a
+rethoric question ran over her cheek, then she continued her way. On her way she
+met a copy.&lt;/p&gt;
+&lt;h6&gt;Slapped cozy a that lightheartedly and far&lt;/h6&gt;
+&lt;p&gt;The copy warned the Little Blind Text, that where it came from it would have
+been rewritten a thousand times and everything that was left from its origin
+would be the word “and” and the Little Blind Text should turn around and return
+to its own, safe country. But nothing the copy said could convince her and so it
+didn’t take long until a few insidious Copy Writers ambushed her, made her drunk
+with Longe and Parole and dragged her into their agency, where they abused her
+for their projects again and again.&lt;/p&gt;</content:encoded></item><item><title><![CDATA[My Second Post!]]></title><description><![CDATA[Wow! I love blogging so much already. Did you know that “despite its name, salted duck eggs can also be made from
+chicken eggs, though the…]]></description><link>https://cbrevik.com/my-second-post/</link><guid isPermaLink="false">https://cbrevik.com/my-second-post/</guid><pubDate>Wed, 06 May 2015 23:46:37 GMT</pubDate><content:encoded>&lt;p&gt;Wow! I love blogging so much already.&lt;/p&gt;
+&lt;p&gt;Did you know that “despite its name, salted duck eggs can also be made from
+chicken eggs, though the taste and texture will be somewhat different, and the
+egg yolk will be less rich.”?
+(&lt;a href=&quot;http://en.wikipedia.org/wiki/Salted_duck_egg&quot;&gt;Wikipedia Link&lt;/a&gt;)&lt;/p&gt;
+&lt;p&gt;Yeah, I didn’t either.&lt;/p&gt;</content:encoded></item><item><title><![CDATA[Hello World]]></title><description><![CDATA[This is my first post on my new fake blog! How exciting! I’m sure I’ll write a lot more interesting things in the future. Oh, and here’s a…]]></description><link>https://cbrevik.com/hello-world/</link><guid isPermaLink="false">https://cbrevik.com/hello-world/</guid><pubDate>Fri, 01 May 2015 22:12:03 GMT</pubDate><content:encoded>&lt;p&gt;This is my first post on my new fake blog! How exciting!&lt;/p&gt;
+&lt;p&gt;I’m sure I’ll write a lot more interesting things in the future.&lt;/p&gt;
+&lt;p&gt;Oh, and here’s a great quote from this Wikipedia on
+&lt;a href=&quot;http://en.wikipedia.org/wiki/Salted_duck_egg&quot;&gt;salted duck eggs&lt;/a&gt;.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;A salted duck egg is a Chinese preserved food product made by soaking duck
+eggs in brine, or packing each egg in damp, salted charcoal. In Asian
+supermarkets, these eggs are sometimes sold covered in a thick layer of salted
+charcoal paste. The eggs may also be sold with the salted paste removed,
+wrapped in plastic, and vacuum packed. From the salt curing process, the
+salted duck eggs have a briny aroma, a gelatin-like egg white and a
+firm-textured, round yolk that is bright orange-red in color.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;
+  &lt;a
+    class=&quot;gatsby-resp-image-link&quot;
+    href=&quot;/static/salty_egg-8058f3f26913fea3b6a89a73344fe94a-3f5a1.jpg&quot;
+    style=&quot;display: block&quot;
+    target=&quot;_blank&quot;
+    rel=&quot;noopener&quot;
+  &gt;
+  
+  &lt;span
+    class=&quot;gatsby-resp-image-wrapper&quot;
+    style=&quot;position: relative; display: block;  max-width: 590px; margin-left: auto; margin-right: auto;&quot;
+  &gt;
+    &lt;span
+      class=&quot;gatsby-resp-image-background-image&quot;
+      style=&quot;padding-bottom: 75%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/jpeg;base64,/9j/2wBDABALDA4MChAODQ4SERATGCgaGBYWGDEjJR0oOjM9PDkzODdASFxOQERXRTc4UG1RV19iZ2hnPk1xeXBkeFxlZ2P/2wBDARESEhgVGC8aGi9jQjhCY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2P/wgARCAAPABQDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAMB/8QAFwEAAwEAAAAAAAAAAAAAAAAAAAEEBf/aAAwDAQACEAMQAAABgik0dXC//8QAGRABAAMBAQAAAAAAAAAAAAAAAQACEhEy/9oACAEBAAEFAkqW2DlnRj73yf/EABcRAQADAAAAAAAAAAAAAAAAAAAREkH/2gAIAQMBAT8B1WX/xAAWEQEBAQAAAAAAAAAAAAAAAAAAEQL/2gAIAQIBAT8Bi6f/xAAbEAABBAMAAAAAAAAAAAAAAAAAAQIRISIxMv/aAAgBAQAGPwK9GNocyS8hCj//xAAbEAADAQADAQAAAAAAAAAAAAABESEAMUGBof/aAAgBAQABPyGxNMfrLHmCDZmAzzvJJDjEQCHv/9oADAMBAAIAAwAAABDIL//EABYRAQEBAAAAAAAAAAAAAAAAAAERAP/aAAgBAwEBPxARhylZv//EABgRAAIDAAAAAAAAAAAAAAAAAAABESFR/9oACAECAQE/EFoktI//xAAdEAEBAAICAwEAAAAAAAAAAAABEQAxIWFBcYHh/9oACAEBAAE/EEbMLQ0fMHDVaPIXyI4pk4JUnWacNCtO8ojDE9TGIYES7/Jn/9k=&apos;); background-size: cover; display: block;&quot;
+    &gt;
+      &lt;img
+        class=&quot;gatsby-resp-image-image&quot;
+        style=&quot;width: 100%; height: 100%; margin: 0; vertical-align: middle; position: absolute; top: 0; left: 0; box-shadow: inset 0px 0px 0px 400px white;&quot;
+        alt=&quot;Chinese Salty Egg&quot;
+        title=&quot;&quot;
+        src=&quot;/static/salty_egg-8058f3f26913fea3b6a89a73344fe94a-f8fb9.jpg&quot;
+        srcset=&quot;/static/salty_egg-8058f3f26913fea3b6a89a73344fe94a-e8976.jpg 148w,
+/static/salty_egg-8058f3f26913fea3b6a89a73344fe94a-63df2.jpg 295w,
+/static/salty_egg-8058f3f26913fea3b6a89a73344fe94a-f8fb9.jpg 590w,
+/static/salty_egg-8058f3f26913fea3b6a89a73344fe94a-85e3d.jpg 885w,
+/static/salty_egg-8058f3f26913fea3b6a89a73344fe94a-d1924.jpg 1180w,
+/static/salty_egg-8058f3f26913fea3b6a89a73344fe94a-9452e.jpg 1770w,
+/static/salty_egg-8058f3f26913fea3b6a89a73344fe94a-3f5a1.jpg 2048w&quot;
+        sizes=&quot;(max-width: 590px) 100vw, 590px&quot;
+      /&gt;
+    &lt;/span&gt;
+  &lt;/span&gt;
+  
+  &lt;/a&gt;
+    &lt;/p&gt;</content:encoded></item><item><title><![CDATA[Remote debugging ASP .NET in Visual Studio 2013]]></title><description><![CDATA[Lately I’ve been working on stabilizing an application for a client on a test server. Sometimes the server logs won’t give you the answer…]]></description><link>https://cbrevik.com/2015-04-03-remote-debugging-vs2013/</link><guid isPermaLink="false">https://cbrevik.com/2015-04-03-remote-debugging-vs2013/</guid><pubDate>Fri, 03 Apr 2015 18:59:00 GMT</pubDate><content:encoded>&lt;p&gt;Lately I’ve been working on stabilizing an application for a client on a test server. Sometimes the server logs won’t give you the answer. You’ve been there many times; “works on my machine”, but not the server.&lt;/p&gt;
+&lt;p&gt;Remote debugging can be of help, but you’ll headbutt the wall trying to make it work. I ran into some trouble myself. This post was written in response to what I feel is a lack of collected information on the subject.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Disclaimer&lt;/strong&gt;: I do not recommend trying to remotely debug a production environment. This should only be done in a pre-production setting in order to squash bugs.&lt;/p&gt;
+&lt;h2&gt;Most importantly&lt;/h2&gt;
+&lt;p&gt;The things to remember:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Symbol-files hold debug information for your application, in .NET these are called PDB-files. They &lt;strong&gt;must&lt;/strong&gt; be available if you want to remotely debug your application.&lt;/li&gt;
+&lt;li&gt;The PDB-files are generated when you build your application, and they &lt;strong&gt;must&lt;/strong&gt; match the exact build you have on the server you want to remotely debug.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;The second point is probably the one which catches a lot of people unware. You cannot use PDB-files from a different build to debug the exact build which is on the server.&lt;/p&gt;
+&lt;p&gt;When you build your application, the DLL and PDB-files are &lt;a href=&quot;http://www.wintellect.com/devcenter/jrobbins/pdb-files-what-every-developer-must-know&quot;&gt;embedded with a GUID&lt;/a&gt;. The debugger looks for the same name (e.g. YourApp.dll and YourApp.pdb), but it also looks at the GUID.
+If the GUID doesn’t match between the DLL and the PDB, the debugger won’t load the symbols!&lt;/p&gt;
+&lt;p&gt;This means it’s important that you keep your symbol-files for each build you intend to deploy.&lt;/p&gt;
+&lt;p&gt;There are a couple of things to be aware of when trying to make your application debuggable. I’ll go through a few things to consider.&lt;/p&gt;
+&lt;h2&gt;What doesn’t matter&lt;/h2&gt;
+&lt;p&gt;Usually in your Web.config file you will find the following element:&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;text&quot;&gt;&lt;pre class=&quot;language-text&quot;&gt;&lt;code class=&quot;language-text&quot;&gt;&amp;lt;configuration&amp;gt;
+	&amp;lt;system.web&amp;gt;
+		&amp;lt;compilation debug=&amp;quot;true&amp;quot; /&amp;gt;
+    &amp;lt;/system.web&amp;gt;
+&amp;lt;/configuration&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Here &lt;code class=&quot;language-text&quot;&gt;debug=&amp;quot;true&amp;quot;&lt;/code&gt; has to do with how your application is compiled and behaves. But, it does &lt;strong&gt;not&lt;/strong&gt; determine if PDB-files are generated.
+Among many other things it; makes execution timeouts infinite, disables many optimizations and turns off resource caching.&lt;/p&gt;
+&lt;p&gt;In your local development environment all these things are useful. But, definitely not in a production environment. With &lt;code class=&quot;language-text&quot;&gt;debug=&amp;quot;true&amp;quot;&lt;/code&gt; you will seriously hinder the application performance, and this is why you’ll usually want to remove it in your server build.&lt;/p&gt;
+&lt;p&gt;So you want to put &lt;code class=&quot;language-text&quot;&gt;&amp;lt;compilation xdt:Transform=&amp;quot;RemoveAttributes(debug)&amp;quot; /&amp;gt;&lt;/code&gt;, or something similar, in the build-transform for your server (e.g. Web.Release.config).&lt;/p&gt;
+&lt;p&gt;Again, &lt;code class=&quot;language-text&quot;&gt;debug=&amp;quot;true&amp;quot;&lt;/code&gt; has nothing to do with PDB-files, so do not worry about removing this element.&lt;/p&gt;
+&lt;h2&gt;What does matter&lt;/h2&gt;
+&lt;p&gt;If you want to generate PDB-files you will have to change your project properties for the relevant build configurations. You will have to do this for every project you want to debug.&lt;/p&gt;
+&lt;p&gt;Go to the project properties, and in the Build tab select to relevant build configuration. In my example I want to do this for the “Release” build configuration which I’m going to use in my server deploy&lt;sup id=&quot;fnref-1&quot;&gt;&lt;a href=&quot;#fn-1&quot; class=&quot;footnote-ref&quot;&gt;1&lt;/a&gt;&lt;/sup&gt;.&lt;/p&gt;
+&lt;p&gt;
+  &lt;a
+    class=&quot;gatsby-resp-image-link&quot;
+    href=&quot;/static/Buildconfig-53f752c82670405655ac85fdca2697df-42a1a.png&quot;
+    style=&quot;display: block&quot;
+    target=&quot;_blank&quot;
+    rel=&quot;noopener&quot;
+  &gt;
+  
+  &lt;span
+    class=&quot;gatsby-resp-image-wrapper&quot;
+    style=&quot;position: relative; display: block;  max-width: 590px; margin-left: auto; margin-right: auto;&quot;
+  &gt;
+    &lt;span
+      class=&quot;gatsby-resp-image-background-image&quot;
+      style=&quot;padding-bottom: 17.90633608815427%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAECAYAAACOXx+WAAAACXBIWXMAAAsTAAALEwEAmpwYAAAA10lEQVQY03XPu27CQBCFYT95lJdKRxEFIQoUQoW9C2aNb3sx2GtshJLmj72kTfHpjM5oioneNjnvccfyMLBOB7bHltX2xHo3U3xsBDtpgq+k5jMxyDSnKguUUqRpGtI5h7WW6HXx4GXx8+ebZdIRC4VQGjmJ05Lj2QaHTE+9oagMWtdUVUVZliGNMUFUFxmuzml0wWPouPkr+TnDTAeXxtE4i7MGazTt9cKt9/QT72f9NPf4mX920X6fkCSSk8po2y4sm6ZBCIEUMuTzrXnfMt7vjOP4jzu/1wokAwp+Tv0AAAAASUVORK5CYII=&apos;); background-size: cover; display: block;&quot;
+    &gt;
+      &lt;img
+        class=&quot;gatsby-resp-image-image&quot;
+        style=&quot;width: 100%; height: 100%; margin: 0; vertical-align: middle; position: absolute; top: 0; left: 0; box-shadow: inset 0px 0px 0px 400px white;&quot;
+        alt=&quot;Select the relevant build configuration&quot;
+        title=&quot;&quot;
+        src=&quot;/static/Buildconfig-53f752c82670405655ac85fdca2697df-fb8a0.png&quot;
+        srcset=&quot;/static/Buildconfig-53f752c82670405655ac85fdca2697df-1a291.png 148w,
+/static/Buildconfig-53f752c82670405655ac85fdca2697df-2bc4a.png 295w,
+/static/Buildconfig-53f752c82670405655ac85fdca2697df-fb8a0.png 590w,
+/static/Buildconfig-53f752c82670405655ac85fdca2697df-42a1a.png 726w&quot;
+        sizes=&quot;(max-width: 590px) 100vw, 590px&quot;
+      /&gt;
+    &lt;/span&gt;
+  &lt;/span&gt;
+  
+  &lt;/a&gt;
+    &lt;/p&gt;
+&lt;p&gt;(Sorry for the possible naming confusion with “Release”, but in this solution it is my pre-production build configuration. Go figure.)&lt;/p&gt;
+&lt;p&gt;Now you can change the properties for this build configuration. If you look in the bottom of the Build tab you’ll find the Advanced button. Here you can change the debug info to specify whether PDB-files are generated or not.&lt;/p&gt;
+&lt;p&gt;
+  &lt;a
+    class=&quot;gatsby-resp-image-link&quot;
+    href=&quot;/static/advbuildsettings-f57ec4135d352c7b7e24429bc0b30903-04f9d.png&quot;
+    style=&quot;display: block&quot;
+    target=&quot;_blank&quot;
+    rel=&quot;noopener&quot;
+  &gt;
+  
+  &lt;span
+    class=&quot;gatsby-resp-image-wrapper&quot;
+    style=&quot;position: relative; display: block;  max-width: 512px; margin-left: auto; margin-right: auto;&quot;
+  &gt;
+    &lt;span
+      class=&quot;gatsby-resp-image-background-image&quot;
+      style=&quot;padding-bottom: 57.421875%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAALCAYAAAB/Ca1DAAAACXBIWXMAAAsTAAALEwEAmpwYAAACHklEQVQoz22TzW/TQBDF8zfDESquXDki8XHmBAdUiZYWEJS2aZyWurYTx0ls726yXq+9/kqR0orHZAuCFg4/zezIejvzZt3T49cQ0xPodACz+AYjzlDwITRzIOcDyNiB5mdQ6RBZ4vw6D1GKU/ruFKXFgZE+ZPAGPZ0cIwgZptMEfKGwWGqUVYequUTTfUemSszmDDIroLSxZDmh/oqqgCwuIaIj9Mr00Ip57jnGowCjIMByIcAZo7hAEs/RPz7GbDq1dcEZhOC3WAiGlC2R+Ps3goxLBL5nxTzXQ+D5uHAv4J67dMkYzmCIJEmhtYZS6j9kyHQNMfmMXpEc0EicOoltR4w645xupdxGQd2mJJYrmLJA+T+KHHVD9swOSTD9Cs+fIJpMIGWGpmlQVRUM0TY1YpEjYAYztUIkW6K7Q4upbDCWa8Thwc3Imw59z0M4Du1YG8HSGHRNhdMox6uTAntzYCf6gV1i5w670TW2I8B1v/wWZJiEITFBSl6ZyljBVVuhH+Z4/JbhyccKL5wrPDtZ4/lgTfk1xSvLS2eNpw5w1P9AguzQPpUkicHIqw1lWcKQ4KbTnLzLaItaCtSFImgBmaLtCmuRVktIPofKcvDwE3qG99GurtC2HdpuZanr9g9Nh6alWrNCVXeWJKsxmgnESwORlRiTVTHX9CPQOwze3Ufwfgv+7gPiIeX/sqn7d2qjva1b+Wj/Edzte/gJGzQXCbRTgyAAAAAASUVORK5CYII=&apos;); background-size: cover; display: block;&quot;
+    &gt;
+      &lt;img
+        class=&quot;gatsby-resp-image-image&quot;
+        style=&quot;width: 100%; height: 100%; margin: 0; vertical-align: middle; position: absolute; top: 0; left: 0; box-shadow: inset 0px 0px 0px 400px white;&quot;
+        alt=&quot;Change the debug info&quot;
+        title=&quot;&quot;
+        src=&quot;/static/advbuildsettings-f57ec4135d352c7b7e24429bc0b30903-04f9d.png&quot;
+        srcset=&quot;/static/advbuildsettings-f57ec4135d352c7b7e24429bc0b30903-dc4e8.png 148w,
+/static/advbuildsettings-f57ec4135d352c7b7e24429bc0b30903-29209.png 295w,
+/static/advbuildsettings-f57ec4135d352c7b7e24429bc0b30903-04f9d.png 512w&quot;
+        sizes=&quot;(max-width: 512px) 100vw, 512px&quot;
+      /&gt;
+    &lt;/span&gt;
+  &lt;/span&gt;
+  
+  &lt;/a&gt;
+    &lt;/p&gt;
+&lt;p&gt;Here your choices are:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;none - no PDB-files are generated&lt;/li&gt;
+&lt;li&gt;pdb-only&lt;/li&gt;
+&lt;li&gt;full&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Both “pdb-only” and “full” will generate the symbol files. What I’ve found in my own debugging is that both will allow you to step through code. But only “full” will allow you to load locals (values) and arguments. For “pdb-only” all values will be “optimized away.”&lt;/p&gt;
+&lt;p&gt;Another thing which will optimize away locals is the “Optimize code” option in the Build tab. This has mostly to do with the JIT-compiler and its optimizations. Turning this off will of course give you worse performance.&lt;/p&gt;
+&lt;p&gt;According to &lt;a href=&quot;https://msdn.microsoft.com/en-us/library/8cw0bt21.aspx&quot;&gt;MSDN&lt;/a&gt;, setting debug to “full” will also give you some impact on performance&lt;sup id=&quot;fnref-2&quot;&gt;&lt;a href=&quot;#fn-2&quot; class=&quot;footnote-ref&quot;&gt;2&lt;/a&gt;&lt;/sup&gt;. If you choose “pdb-only” you will still be able to step-through and analyze crash dumps.&lt;/p&gt;
+&lt;p&gt;There is no point in choosing “none” because of fear of performance impact, as generating symbol files will have &lt;a href=&quot;http://www.wintellect.com/devcenter/jrobbins/do-pdb-files-affect-performance&quot;&gt;no impact&lt;/a&gt; on the performance of your application.&lt;/p&gt;
+&lt;p&gt;If you’re using publish profiles (*.pubxml) I’d recommend going into your project properties and unchecking “Exclude generated debug symbols” under Package/Publish Web. This also for the relevant build configuration.&lt;/p&gt;
+&lt;p&gt;
+  &lt;a
+    class=&quot;gatsby-resp-image-link&quot;
+    href=&quot;/static/excludesymbols-02a8d571b2171afd00df9b5442cb87a0-1e685.png&quot;
+    style=&quot;display: block&quot;
+    target=&quot;_blank&quot;
+    rel=&quot;noopener&quot;
+  &gt;
+  
+  &lt;span
+    class=&quot;gatsby-resp-image-wrapper&quot;
+    style=&quot;position: relative; display: block;  max-width: 510px; margin-left: auto; margin-right: auto;&quot;
+  &gt;
+    &lt;span
+      class=&quot;gatsby-resp-image-background-image&quot;
+      style=&quot;padding-bottom: 34.11764705882353%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAHCAYAAAAIy204AAAACXBIWXMAAAsTAAALEwEAmpwYAAABbklEQVQoz01SyU7DMBTMV/IJgPgzTiAuLBIVi5CAQneaxHFsNy1tEidO0gJtEdLw4lLgMJq3eTzPsjMWDOv3Csu5wXJRYEWouSgK5HlObGCMgdYacTxDmqYWWm9Z29kNDJzGQONRfeBevOGBcMMWFC+Qk4gQAq7rgTEGzkNibmtCKHiuj1BIKKVsn/k+Ai7h7B2vsXe0wi5hn+Kdwy8cnHwizUr4QYn+0BCIXwp0BwXavcLGnZ4B48a6yvPNBjrL4Hiu++8GjpyK86pEQQ45F5AqsjcLMaK5EFJGCEMFHtS9kXXM63PG2LUdz/MQBMwWQ0KSJKhIsCxLpMmMVpKIRiMoKYgVXieRZSlC24tnUyRx/PueDvMZhJTIyFktsn3geVXhYTDF2XUbF7ddnF49U9zC+XVnkzeecHnXR9ONkZBYbaSG49Oq48nkT+yH67zpZej6U7TdCZ5fxmgNI+IILcpbwzGGQqMjKvoFm/ka3xv5+mT7Kj67AAAAAElFTkSuQmCC&apos;); background-size: cover; display: block;&quot;
+    &gt;
+      &lt;img
+        class=&quot;gatsby-resp-image-image&quot;
+        style=&quot;width: 100%; height: 100%; margin: 0; vertical-align: middle; position: absolute; top: 0; left: 0; box-shadow: inset 0px 0px 0px 400px white;&quot;
+        alt=&quot;Uncheck exclude&quot;
+        title=&quot;&quot;
+        src=&quot;/static/excludesymbols-02a8d571b2171afd00df9b5442cb87a0-1e685.png&quot;
+        srcset=&quot;/static/excludesymbols-02a8d571b2171afd00df9b5442cb87a0-9b682.png 148w,
+/static/excludesymbols-02a8d571b2171afd00df9b5442cb87a0-ef5d6.png 295w,
+/static/excludesymbols-02a8d571b2171afd00df9b5442cb87a0-1e685.png 510w&quot;
+        sizes=&quot;(max-width: 510px) 100vw, 510px&quot;
+      /&gt;
+    &lt;/span&gt;
+  &lt;/span&gt;
+  
+  &lt;/a&gt;
+    &lt;/p&gt;
+&lt;p&gt;That about covers what you need to do with the project files. Now your project-file (*.csproj) will contain something like this:&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;text&quot;&gt;&lt;pre class=&quot;language-text&quot;&gt;&lt;code class=&quot;language-text&quot;&gt;&amp;lt;PropertyGroup Condition=&amp;quot; &amp;#39;$(Configuration)|$(Platform)&amp;#39; == &amp;#39;Release|AnyCPU&amp;#39; &amp;quot;&amp;gt;
+ &amp;lt;DebugType&amp;gt;full&amp;lt;/DebugType
+ &amp;lt;ExcludeGeneratedDebugSymbol&amp;gt;false&amp;lt;/ExcludeGeneratedDebugSymbol&amp;gt;
+ &amp;lt;DebugSymbols&amp;gt;true&amp;lt;/DebugSymbols&amp;gt;
+ &amp;lt;Optimize&amp;gt;false&amp;lt;/Optimize&amp;gt;
+&amp;lt;/PropertyGroup&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2&gt;What you need to do on the server&lt;/h2&gt;
+&lt;p&gt;In order to debug remotely you’ll have to install remote tools on the server. There are of course a few other &lt;a href=&quot;https://msdn.microsoft.com/en-us/library/bt727f1t.aspx#BKMK_Prerequisites&quot;&gt;pre-requisites&lt;/a&gt; to make this work:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;You have to be connected over network to the server for remote debugging.&lt;/li&gt;
+&lt;li&gt;You must be an administrator to install the remote tools on the remote server.&lt;/li&gt;
+&lt;li&gt;To communicate with the remote tools, you must have user access to the remote server (e.g. a domain account).&lt;/li&gt;
+&lt;li&gt;The remote server must be running the remote tool when you want to debug.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;There are &lt;a href=&quot;https://msdn.microsoft.com/en-us/library/bt727f1t.aspx#BKMK_Installing_the_Remote_Tools&quot;&gt;multiple versions of the remote tools&lt;/a&gt;, choose the download that matches your Visual Studio version, and the operating system on the server. After the remote tools are installed you’ll need to do a few more things to make it work.&lt;/p&gt;
+&lt;p&gt;If you have a firewall in front of the server you’ll need to open up port 4018, which is used for remote debugging. If you have Windows Firewall on the server you can open up this port by going to Advanced Settings on the Windows Firewall and adding an Inbound rule to open up port 4018.&lt;/p&gt;
+&lt;p&gt;
+  &lt;a
+    class=&quot;gatsby-resp-image-link&quot;
+    href=&quot;/static/winfirewall-918d365a3c85e65d6dc5f197b14f3fc3-b7cef.png&quot;
+    style=&quot;display: block&quot;
+    target=&quot;_blank&quot;
+    rel=&quot;noopener&quot;
+  &gt;
+  
+  &lt;span
+    class=&quot;gatsby-resp-image-wrapper&quot;
+    style=&quot;position: relative; display: block;  max-width: 590px; margin-left: auto; margin-right: auto;&quot;
+  &gt;
+    &lt;span
+      class=&quot;gatsby-resp-image-background-image&quot;
+      style=&quot;padding-bottom: 54.842615012106535%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAALCAYAAAB/Ca1DAAAACXBIWXMAAAsTAAALEwEAmpwYAAAB80lEQVQoz3WRTW+bQBCG+beplLT3qn+j7aFSqkrtqVWstteox1Zx0gTHnwGDYcEYbMynDcRgeDusiWUrKtKjmd2FZ3YG4fddB9cjBTejMa4GY4gTA31moUf0jdl/GZg27sYa/nSHaA8kXPUfOIKkWdDYBApjUBQDpmHDs0y4UwOOrhETHueGfgTfYzoWJsPCaKBcGHRvIUtDDEcSWqKE99djvLn4hdffLvHq03e8JM4+tnDy7gteECdvP3NOzy/4/ul5A+VnH75CUFUNqixD1hh+3sv40VPRuldwOXFw42/QXmZouyn+LnfcNojxFp1ViU7cUOfRFoLrRUiTFN4qgWq72ARLZFGATRwiX0VEzAFKotrFiiiL51QkzLIU9ZPROx1ziqnjYZ0+Ii8KJGkKZhiY6Dp0ZoARtuPADwJ4vk8EzxDWScKF63wLeeFhUX9AB1mWISWhpmnQSRjHMcIwRBRFe+p1QPKAx5CvhaQRJkWJh1mAiCo/PbVwTgXm8zlc14VD+SG1rJYcsheu8gIsSFDmOaqq2o2BbjmlMUgPElRFhW3bmM0IirZdtx42rfqcusBeGG8KzNaPPC8PhKZpQhRF9Lo9flNGBQzLhrNwYdlz+GFExPAo8hkeCq1VdiSsz+qqMf3lp5nx1umGHGo7DI/b/gc5OigoqFVYvQAAAABJRU5ErkJggg==&apos;); background-size: cover; display: block;&quot;
+    &gt;
+      &lt;img
+        class=&quot;gatsby-resp-image-image&quot;
+        style=&quot;width: 100%; height: 100%; margin: 0; vertical-align: middle; position: absolute; top: 0; left: 0; box-shadow: inset 0px 0px 0px 400px white;&quot;
+        alt=&quot;Windows firewall inbound rule&quot;
+        title=&quot;&quot;
+        src=&quot;/static/winfirewall-918d365a3c85e65d6dc5f197b14f3fc3-fb8a0.png&quot;
+        srcset=&quot;/static/winfirewall-918d365a3c85e65d6dc5f197b14f3fc3-1a291.png 148w,
+/static/winfirewall-918d365a3c85e65d6dc5f197b14f3fc3-2bc4a.png 295w,
+/static/winfirewall-918d365a3c85e65d6dc5f197b14f3fc3-fb8a0.png 590w,
+/static/winfirewall-918d365a3c85e65d6dc5f197b14f3fc3-b7cef.png 826w&quot;
+        sizes=&quot;(max-width: 590px) 100vw, 590px&quot;
+      /&gt;
+    &lt;/span&gt;
+  &lt;/span&gt;
+  
+  &lt;/a&gt;
+    &lt;/p&gt;
+&lt;p&gt;You can set security on this rule as appropriate, for example by only allowing connections from authenticated users.&lt;/p&gt;
+&lt;p&gt;When starting the Remote Debugger (as the server tool is called), I’d recommend right-clicking and “Run as administrator”.
+Now go to Tools &gt; Options and set authentication mode to Windows Authentication, then click permissions and add the user you want to use for debugging (from Visual Studio).&lt;/p&gt;
+&lt;p&gt;
+  &lt;a
+    class=&quot;gatsby-resp-image-link&quot;
+    href=&quot;/static/remotetoolsoptions-cd2f0b358949efe0d6c86554f01f3864-99108.png&quot;
+    style=&quot;display: block&quot;
+    target=&quot;_blank&quot;
+    rel=&quot;noopener&quot;
+  &gt;
+  
+  &lt;span
+    class=&quot;gatsby-resp-image-wrapper&quot;
+    style=&quot;position: relative; display: block;  max-width: 422px; margin-left: auto; margin-right: auto;&quot;
+  &gt;
+    &lt;span
+      class=&quot;gatsby-resp-image-background-image&quot;
+      style=&quot;padding-bottom: 89.81042654028435%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAASCAYAAABb0P4QAAAACXBIWXMAAAsTAAALEwEAmpwYAAADWklEQVQ4y3WU228bVRDG9z/lkSdEaaVKEIHgAakCIUSoKhCPKKUBcRFKaJLWcSBO3NRx0rW99/iyN6+9912vvXaK+Jhz3AQH6MNP5+zM+jvfzJy1sN9s4UDpYutZE9/tVfFD9QgbO1U8enJAzwfYfPoHZ+NxBRu7LF7FQ4o/4u8e8xzbbz79HQ8pL8jdAdSBhc5FD6Ki4UxWoZs2dMuBRnG524fSNyFRvqUZ6BhdsN/weM8kBhyRcqJqQDBUFc6gj66mwfc8xL6PoWXC6vUwcl1cliUuF3O8XCxwOS+xmE1vUs54Lo1j+OMRhFsVCbePB7hd6+HuMwvvNYe4dXiBt6oa7tb7WHtu4p0nIu5UOnj3xMLa2QhrTY/z/pmHt+nd9W9/xt6bb+Cnjz6E8EHDxtdahPtKgPtygC8lHw/UiPPxeYh7TRef1jV8cqzh8xcu1qUAX3R8zjrxGcW+Ouxg85ddPNiuQdhVLXi6Ar3Thn1hQG+34DsW5nmCH09TiL0EVCvKGTGdoiyKJZMl82KKolxg9udfOPELCNuag1meYhyECMIIYRQt1zhBksSIWG/omRFE8RLKhXHK32GwWB5HaDghhB1jiKHZR6N5DlFsQZZltFttjMY+0jQj0ZTWm4RhiPF4DJ8GGAQBfIIJNr0YwmMS9F0HBpVrGBfo9Wni3S4kSYKuG1wgSRIO28fkmOXr9Tr296uo1Y7Q7kh0U3o4HZLgb7qLIomgqDpkEmEOxVYLrjvkAlmWXYterRG1hblkDsdUCXM4ofZwQdbDknrISjRNk1zp3IFl2XAch2IWF1gVvTqIkbMDiVmeockdkuDLaYEsnyB5VRJb2TCYi9FoxPcJF1wSM5dxfE1IQ7l2uKXYGBg6JEWBqmpQ6PPT6Kthpff7A+R5fsMdE3AdF5PJhOcYzEw5yXBi+8uSiziE92pqbHrMFYM9X4v9q4eskivYIUVKDt1oWfJlkfOSrvqyymrfVversBZMs3R5bbb4UDJ+WXlvVoj/Q8pJ6H7+syeyHAUJ8h7u6Q5oRPyEef7/sFuwoB5FfoAu3VXx7Bx9+vuy6QZorRdoHNdgqTJOTQ/CN6KFBikfWiFq9us5siMcDALs6ENsyxZ2dQ+VrocdZYBfRQMVzcL3+hh/AzVfExCJkAUfAAAAAElFTkSuQmCC&apos;); background-size: cover; display: block;&quot;
+    &gt;
+      &lt;img
+        class=&quot;gatsby-resp-image-image&quot;
+        style=&quot;width: 100%; height: 100%; margin: 0; vertical-align: middle; position: absolute; top: 0; left: 0; box-shadow: inset 0px 0px 0px 400px white;&quot;
+        alt=&quot;Remote tools options&quot;
+        title=&quot;&quot;
+        src=&quot;/static/remotetoolsoptions-cd2f0b358949efe0d6c86554f01f3864-99108.png&quot;
+        srcset=&quot;/static/remotetoolsoptions-cd2f0b358949efe0d6c86554f01f3864-a3440.png 148w,
+/static/remotetoolsoptions-cd2f0b358949efe0d6c86554f01f3864-90288.png 295w,
+/static/remotetoolsoptions-cd2f0b358949efe0d6c86554f01f3864-99108.png 422w&quot;
+        sizes=&quot;(max-width: 422px) 100vw, 422px&quot;
+      /&gt;
+    &lt;/span&gt;
+  &lt;/span&gt;
+  
+  &lt;/a&gt;
+    &lt;/p&gt;
+&lt;p&gt;It is possible to run the Remote Debugger as a service, but this is generally not recommended. If you wish to do so you can run the Remote Debugger Configuration wizard to set this up.&lt;/p&gt;
+&lt;p&gt;One last thing; in order for the debugger in Visual Studio to attach to the process, it needs to have access to the PDB-files somehow. If you do not have a Symbol/Source server&lt;sup id=&quot;fnref-3&quot;&gt;&lt;a href=&quot;#fn-3&quot; class=&quot;footnote-ref&quot;&gt;3&lt;/a&gt;&lt;/sup&gt;, then probably the easiest way to accomplish this is through file share.&lt;/p&gt;
+&lt;p&gt;Since I do not want to share the &lt;code class=&quot;language-text&quot;&gt;\bin&lt;/code&gt; folder from my solution web root, I normally copy my PDB-files into their own &lt;code class=&quot;language-text&quot;&gt;\symbols&lt;/code&gt;, and share this on the network. Later you’ll need to define the network path to this folder in Visual Studio.
+A minor issue here is that Visual Studio won’t allow you to authenticate to this folder, so either authenticate by visiting it explicitly outside VS&lt;sup id=&quot;fnref-4&quot;&gt;&lt;a href=&quot;#fn-4&quot; class=&quot;footnote-ref&quot;&gt;4&lt;/a&gt;&lt;/sup&gt;, or share it with “Everyone”.&lt;/p&gt;
+&lt;h2&gt;Debugging in Visual Studio&lt;/h2&gt;
+&lt;p&gt;First off, to state the obvious, the source files you’re attempting to use for debugging should match the release that is on the server. Retrieve it from version control if you have to.
+You’ll still likely run into some problems when debugging remotely, so there’s a few option you should set.&lt;/p&gt;
+&lt;p&gt;In Visual Studio, go to Tools &gt; Options &gt; Debugging &gt; General and:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Uncheck “Enable Just My Code”&lt;/li&gt;
+&lt;li&gt;Uncheck “Require source files to exactly match the original version”&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Then go to Symbols under Debugging. Click the folder-icon up right to define your own symbol locations. Here the network path to your symbols folder (as defined in the previous section) should be put, and remember to check the box next to the path.
+Again Visual Studio will not let you authenticate here, so you should do it manually somehow&lt;sup id=&quot;fnref-4&quot;&gt;&lt;a href=&quot;#fn-4&quot; class=&quot;footnote-ref&quot;&gt;4&lt;/a&gt;&lt;/sup&gt;.&lt;/p&gt;
+&lt;p&gt;Since the process of downloading the symbols might be slow, you should define a directory to cache them in (as shown below).&lt;/p&gt;
+&lt;p&gt;
+  &lt;a
+    class=&quot;gatsby-resp-image-link&quot;
+    href=&quot;/static/symbols-ed5de66fa00f74e2a3216731440782be-45fcc.png&quot;
+    style=&quot;display: block&quot;
+    target=&quot;_blank&quot;
+    rel=&quot;noopener&quot;
+  &gt;
+  
+  &lt;span
+    class=&quot;gatsby-resp-image-wrapper&quot;
+    style=&quot;position: relative; display: block;  max-width: 590px; margin-left: auto; margin-right: auto;&quot;
+  &gt;
+    &lt;span
+      class=&quot;gatsby-resp-image-background-image&quot;
+      style=&quot;padding-bottom: 58.17941952506597%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAMCAYAAABiDJ37AAAACXBIWXMAAAsTAAALEwEAmpwYAAACUklEQVQoz31TW27bMBD0jftdoG0e6CH60yP0EkXRJk5sp7Gt6EFZD0uWKJEUaT2MIB/TJZ0W+aqAAcnl7uzucDWTiyvIxSXE/QXU8grd8tqdm/lHiLtPqG8vkHz/QPeXzi7tSr4ubvkZ3eoaLdnZ1/dgX95hxhsJXleQUmIYegelFIoiR5YmEKJF23CItoGSgvxa56tEiaZYo8wS7LMUjaygq1+Y7XY5Aj8gghJaa0zThKqqcagq+E8+thsP6/UGjMXo+4ESDuiHCWMvYEQAwTklbNE0lCwjwjDagUWRI7POlrAoClR1TQS9g717eXnB/z4bJ7OfmOX5wRH+DT6dTo6waRqM44jh1W6McQnt/YmCLaZpdOfn52ccj0fInCoUQuPJ8xCzHTQFjeO5wpLa9sMY662PJCtR1qSlMjD9BH0cYahtPVDysiQ5mCug299gtvESzOcrhFGGfM+xLxpEJAMnXaTSqHlL5Bw1aaQ6g1Z2tG8RUQF+yOD7lDBJwUlLZQn9IEYUhmjb1olu2zwcKtSkYUyZGd3t4hhhEKCmhzJGo+sUvbg8gybCamyhbMsRS5EmdjyEI7OweghK8NtjuH0IMH9kuCMcqO0zYfePxMKeLRxhEDBs14+uGqUkpnEgp87N3hPL8Bjk8FjuWrJ2W52FJhg6n1ft9jKnV67bnnSSNCY04G0HczxBdkR6nNDRXugJypzcY3RmpIcbaZ3A5YCCazRqcPE1p0Tlgv6U/QY8W4HnD26t0iXqN+Cv61t7la6QRveIvBtkbIGd98Oh3HzDH+xsca1lamaeAAAAAElFTkSuQmCC&apos;); background-size: cover; display: block;&quot;
+    &gt;
+      &lt;img
+        class=&quot;gatsby-resp-image-image&quot;
+        style=&quot;width: 100%; height: 100%; margin: 0; vertical-align: middle; position: absolute; top: 0; left: 0; box-shadow: inset 0px 0px 0px 400px white;&quot;
+        alt=&quot;Symbols define network path&quot;
+        title=&quot;&quot;
+        src=&quot;/static/symbols-ed5de66fa00f74e2a3216731440782be-fb8a0.png&quot;
+        srcset=&quot;/static/symbols-ed5de66fa00f74e2a3216731440782be-1a291.png 148w,
+/static/symbols-ed5de66fa00f74e2a3216731440782be-2bc4a.png 295w,
+/static/symbols-ed5de66fa00f74e2a3216731440782be-fb8a0.png 590w,
+/static/symbols-ed5de66fa00f74e2a3216731440782be-45fcc.png 758w&quot;
+        sizes=&quot;(max-width: 590px) 100vw, 590px&quot;
+      /&gt;
+    &lt;/span&gt;
+  &lt;/span&gt;
+  
+  &lt;/a&gt;
+    &lt;/p&gt;
+&lt;p&gt;Next I recommend checking “Only specified modules”, then click the link below it to specify which modules you want to debug (e.g. YourApp.dll).&lt;/p&gt;
+&lt;p&gt;Now finally, we’re ready to start debugging!&lt;/p&gt;
+&lt;p&gt;Go to Tools &gt; Attach to Process (CTRL + ALT + P, handy shortcut).
+The Transport should be Default. In the Qualifier (where your computer name probably is), type the IP/host of the remote server, and add port 4018. For example &lt;code class=&quot;language-text&quot;&gt;myserver:4018&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Next press Enter and you will most likely be prompted to authenticate. Login with the user as defined in the remote tools on the server.&lt;/p&gt;
+&lt;p&gt;
+  &lt;a
+    class=&quot;gatsby-resp-image-link&quot;
+    href=&quot;/static/attachstep1-179b696f40ee335bc96de26ec56340e6-1fe17.png&quot;
+    style=&quot;display: block&quot;
+    target=&quot;_blank&quot;
+    rel=&quot;noopener&quot;
+  &gt;
+  
+  &lt;span
+    class=&quot;gatsby-resp-image-wrapper&quot;
+    style=&quot;position: relative; display: block;  max-width: 590px; margin-left: auto; margin-right: auto;&quot;
+  &gt;
+    &lt;span
+      class=&quot;gatsby-resp-image-background-image&quot;
+      style=&quot;padding-bottom: 32.10586881472957%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAGCAYAAADDl76dAAAACXBIWXMAAAsTAAALEwEAmpwYAAABDklEQVQY002QSU/DMBCF8+eRWErhyv9BcKIsShMalmxeEsdLbNrzY+xWkMOn53nzNKNxZp7PoTbXMK/rxLS5Ir2BeVnDUj08rVA/XKB9vEzvmNHUMwtcfgt5v8Lu7gyZYgUYV/jZHzD7PT7rHr2cMNmQ0IRxR/TJWzIoAylHiGGAPThkQ/uGPC/xUe3QNC06JtB2DJOxR/RCl5CntIGQA5q6huAClvzMiAJV9YViu8V7WUIKkRCc/yOisvTmjB3hUXvS6HFYYzDPM53c57RlhPczQvAYxxGGmt77FFgSveQTIYS/TMxrreGci3+Y47vuwGirphOsdSkQNYadI04DrbWpFz2lVKrjEKWmlI/1LwlAtsb1efFzAAAAAElFTkSuQmCC&apos;); background-size: cover; display: block;&quot;
+    &gt;
+      &lt;img
+        class=&quot;gatsby-resp-image-image&quot;
+        style=&quot;width: 100%; height: 100%; margin: 0; vertical-align: middle; position: absolute; top: 0; left: 0; box-shadow: inset 0px 0px 0px 400px white;&quot;
+        alt=&quot;Attach to process step 1&quot;
+        title=&quot;&quot;
+        src=&quot;/static/attachstep1-179b696f40ee335bc96de26ec56340e6-fb8a0.png&quot;
+        srcset=&quot;/static/attachstep1-179b696f40ee335bc96de26ec56340e6-1a291.png 148w,
+/static/attachstep1-179b696f40ee335bc96de26ec56340e6-2bc4a.png 295w,
+/static/attachstep1-179b696f40ee335bc96de26ec56340e6-fb8a0.png 590w,
+/static/attachstep1-179b696f40ee335bc96de26ec56340e6-1fe17.png 869w&quot;
+        sizes=&quot;(max-width: 590px) 100vw, 590px&quot;
+      /&gt;
+    &lt;/span&gt;
+  &lt;/span&gt;
+  
+  &lt;/a&gt;
+    &lt;/p&gt;
+&lt;p&gt;Check “Show all processes from all users”, and select the &lt;code class=&quot;language-text&quot;&gt;w3wp.exe&lt;/code&gt; or whichever process which corresponds to your application (make sure it’s running). Next click Attach, and you’re off!&lt;/p&gt;
+&lt;p&gt;If your symbols are not loading automatically you might have to do it manually.
+While attached to the process, in VS go to Debug &gt; Windows &gt; Modules. Scroll down to the module you want to debug, right-click and select “Load Symbols”.&lt;/p&gt;
+&lt;p&gt;If it’s still not loading, either the network path is not reachable, or the symbol does not match the assembly (remember the GUIDs). You can also right-click the module and select “Symbol Load Information” to see where the debugger has looked, and the results of that search.&lt;/p&gt;
+&lt;p&gt;That’s all there is to it, I hope this will be of help to you!&lt;/p&gt;
+&lt;hr&gt;
+&lt;p&gt;Footnotes:&lt;/p&gt;
+&lt;div class=&quot;footnotes&quot;&gt;
+&lt;hr&gt;
+&lt;ol&gt;
+&lt;li id=&quot;fn-1&quot;&gt;
+&lt;p&gt;  If you’re going to change the properties for a lot of the projects in your solution, it would be easier to set the relevant build configuration in the top of Visual Studio under your menu bar. This is because your project properties can also track the “Active” build configuration. If you’re going to switch between build configurations to compare though, it’s faster to do this in your project properties.&lt;/p&gt;
+&lt;a href=&quot;#fnref-1&quot; class=&quot;footnote-backref&quot;&gt;↩&lt;/a&gt;
+&lt;/li&gt;
+&lt;li id=&quot;fn-2&quot;&gt;
+&lt;p&gt;  This MSDN article might be out-dated, and “full” might not give you that much of an performance impact. According to &lt;a href=&quot;http://www.wintellect.com/devcenter/jrobbins/do-pdb-files-affect-performance&quot;&gt;some&lt;/a&gt; there is no difference between “pdb-only” and “full”, and that they only exist for historical reasons. If you’re going to do a lot of debugging on the remote environment, then the performance trade-off might be worth it (or possibly non-existent).&lt;/p&gt;
+&lt;a href=&quot;#fnref-2&quot; class=&quot;footnote-backref&quot;&gt;↩&lt;/a&gt;
+&lt;/li&gt;
+&lt;li id=&quot;fn-3&quot;&gt;
+&lt;p&gt;  A &lt;a href=&quot;https://msdn.microsoft.com/en-us/library/windows/desktop/ms680693(v=vs.85).aspx&quot;&gt;Symbol Server&lt;/a&gt; lets your index your PDB-files for releases, &lt;a href=&quot;https://msdn.microsoft.com/en-us/library/windows/desktop/ms680641(v=vs.85).aspx&quot;&gt;Source Server&lt;/a&gt; does the same for source files. This makes for easier retrieval of these files if you need to debug certain releases. If you’re using Team City to build and test your releases, you could make &lt;a href=&quot;http://blog.jetbrains.com/teamcity/2015/02/setting-up-teamcity-as-symbol-and-source-server/&quot;&gt;indexing your symbol files and source files&lt;/a&gt; as a part of the build.&lt;/p&gt;
+&lt;a href=&quot;#fnref-3&quot; class=&quot;footnote-backref&quot;&gt;↩&lt;/a&gt;
+&lt;/li&gt;
+&lt;li id=&quot;fn-4&quot;&gt;
+&lt;p&gt;  You could also “Map a network drive” in Windows to automatically re-authenticate.&lt;/p&gt;
+&lt;a href=&quot;#fnref-4&quot; class=&quot;footnote-backref&quot;&gt;↩&lt;/a&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;</content:encoded></item><item><title><![CDATA[vNext tools on OS X]]></title><description><![CDATA[This weekend I did talk on  SOLID  at the  Knowit  Developer Summit 2014 in Stockholm. These five principles are well known to most ASP.NET…]]></description><link>https://cbrevik.com/2014-10-26-vnext/</link><guid isPermaLink="false">https://cbrevik.com/2014-10-26-vnext/</guid><pubDate>Sun, 26 Oct 2014 13:22:00 GMT</pubDate><content:encoded>&lt;p&gt;This weekend I did talk on &lt;a href=&quot;http://en.wikipedia.org/wiki/SOLID_(object-oriented_design)&quot;&gt;SOLID&lt;/a&gt; at the &lt;a href=&quot;http://www.knowit.no/&quot;&gt;Knowit&lt;/a&gt; Developer Summit 2014 in Stockholm. These five principles are well known to most ASP.NET developers, but it can be difficult to be aware of them in the day-to-day.&lt;/p&gt;
+&lt;p&gt;Some of the time they are applied instinctively. You just make the code “feel right”. To illuminate the situations where SOLID might be applicable, I demonstrated the principles by refactoring an ASP.NET solution on stage.&lt;/p&gt;
+&lt;p&gt;And just to make it even more difficult for myself, I did it in:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;An alpha version of ASP.NET vNext.&lt;/li&gt;
+&lt;li&gt;On OS X.&lt;/li&gt;
+&lt;li&gt;In Sublime Text 3.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;I was asked to give a little bit of info on the tools I used, and how to get up-and-running. The following will be a simple guide.&lt;/p&gt;
+&lt;p&gt;Presupposing some knowledge of what vNext is (if not read this &lt;a href=&quot;http://www.hanselman.com/blog/IntroducingASPNETVNext.aspx&quot;&gt;introduction&lt;/a&gt;), let’s soldier on!&lt;/p&gt;
+&lt;h2&gt;Getting Started&lt;/h2&gt;
+&lt;p&gt;One of the many good things about ASP.NET vNext, is that Microsoft are using Github!
+There you’ll find the &lt;a href=&quot;https://github.com/aspnet/Home&quot;&gt;Home repository&lt;/a&gt; which has samples and an install guide.&lt;/p&gt;
+&lt;p&gt;For OS X I’ll reprint the install guide here, it’s quite straightforward.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Install &lt;a href=&quot;http://brew.sh/&quot;&gt;Homebrew&lt;/a&gt; if it is not already installed.&lt;/li&gt;
+&lt;li&gt;Run command &lt;code class=&quot;language-text&quot;&gt;brew tap aspnet/k&lt;/code&gt; to tap the ASP.NET vNext related git repositories. If you had already tapped the repo for previous releases, run &lt;code class=&quot;language-text&quot;&gt;brew untap aspnet/k&lt;/code&gt; to delete the old commands and tap again to get the updated brew scripts.&lt;/li&gt;
+&lt;li&gt;Run command &lt;code class=&quot;language-text&quot;&gt;brew install kvm&lt;/code&gt; to install KVM. This also automatically install the latest KRE package from &lt;a href=&quot;https://www.myget.org/f/aspnetmaster/api/v2&quot;&gt;https://www.myget.org/f/aspnetmaster/api/v2&lt;/a&gt; feed.&lt;/li&gt;
+&lt;li&gt;Run command &lt;code class=&quot;language-text&quot;&gt;source kvm.sh&lt;/code&gt; on your terminal if your terminal cannot understand kvm.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;I’d recommend putting &lt;code class=&quot;language-text&quot;&gt;source kvm.sh&lt;/code&gt; in your &lt;b&gt;~/.bash_profile&lt;/b&gt; as well. Now you have the latest ASP.NET version installed!&lt;/p&gt;
+&lt;h2&gt;The tools&lt;/h2&gt;
+&lt;p&gt;Next you’ll have to install &lt;a href=&quot;http://www.sublimetext.com/3&quot;&gt;Sublime Text 3&lt;/a&gt; if you don’t already have it.
+We can install two helpful extensions in Sublime Text 3 to make our life easier.&lt;/p&gt;
+&lt;p&gt;To do this you need the &lt;a href=&quot;https://sublime.wbond.net/installation#st3&quot;&gt;Package Control&lt;/a&gt;, see the link for instructions. Afterwards do the following steps in Sublime Text to install the extensions:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Bring up the Command Palette (Cmd + Shift + P).&lt;/li&gt;
+&lt;li&gt;Select &lt;code class=&quot;language-text&quot;&gt;Package Control: Install Package&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;Select &lt;code class=&quot;language-text&quot;&gt;Kulture&lt;/code&gt; when the list appears.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Then do it again, but on the third step select &lt;code class=&quot;language-text&quot;&gt;OmniSharp&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;These two excellent extensions gives you a much richer experience with developing ASP.NET in Sublime Text.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https://github.com/ligershark/Kulture&quot;&gt;Kulture&lt;/a&gt; gives you the ability to:
+_ Build, press Cmd + B.
+_ Run K commands, press Cmd + Shift + P and then Run K Commands. This means for example you can start the server k kestrel or restore packages with &lt;code class=&quot;language-text&quot;&gt;kpm restore&lt;/code&gt; in Sublime Text.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://github.com/moonrabbit/OmniSharpSublime&quot;&gt;OmniSharp&lt;/a&gt; gives you Intellisense inside Sublime Text, and so much more. See the link for more details.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2&gt;Putting it to good use&lt;/h2&gt;
+&lt;p&gt;Next I would recommend and cloning the Home repository from the ASP.NET-team, and play around with the samples:&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;bash&quot;&gt;&lt;pre class=&quot;language-bash&quot;&gt;&lt;code class=&quot;language-bash&quot;&gt;&lt;span class=&quot;token function&quot;&gt;git&lt;/span&gt; clone git@github.com:aspnet/Home.git&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The makers of the Kulture-extension also have a yeoman generator to get the ball rolling:&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;bash&quot;&gt;&lt;pre class=&quot;language-bash&quot;&gt;&lt;code class=&quot;language-bash&quot;&gt;&lt;span class=&quot;token function&quot;&gt;npm&lt;/span&gt; &lt;span class=&quot;token function&quot;&gt;install&lt;/span&gt; -g yo
+&lt;span class=&quot;token function&quot;&gt;npm&lt;/span&gt; &lt;span class=&quot;token function&quot;&gt;install&lt;/span&gt; -g generator-aspnet&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;That about wraps it up, hope it’ll help you get started.&lt;/p&gt;</content:encoded></item></channel></rss>
