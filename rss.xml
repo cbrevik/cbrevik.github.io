@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Christian Brevik]]></title><description><![CDATA[A blog from a developer living in Oslo.]]></description><link>https://cbrevik.com</link><generator>RSS for Node</generator><lastBuildDate>Mon, 29 Oct 2018 11:04:52 GMT</lastBuildDate><item><title><![CDATA[React Native and the Array.reverse bug]]></title><description><![CDATA[The news that broke a couple of days ago about the  -bug that occurs in the newly released iOS 12 was  a bit  scary. I first learnt about it…]]></description><link>https://cbrevik.com/react-native-and-the-array-reverse-bug/</link><guid isPermaLink="false">https://cbrevik.com/react-native-and-the-array-reverse-bug/</guid><pubDate>Fri, 21 Sep 2018 09:59:00 GMT</pubDate><content:encoded>&lt;p&gt;The news that broke a couple of days ago about the &lt;code class=&quot;language-text&quot;&gt;Array.reverse&lt;/code&gt;-bug that occurs in the newly released iOS 12 was &lt;em&gt;a bit&lt;/em&gt; scary. I first learnt about it from &lt;a href=&quot;https://stackoverflow.com/questions/52390368/array-state-will-be-cached-in-ios-12-safari-is-it-a-bug-or-feature/&quot;&gt;this Stack Overflow-post&lt;/a&gt; by way of &lt;a href=&quot;https://news.ycombinator.com/item?id=18021835&quot;&gt;Hacker News&lt;/a&gt;.&lt;/p&gt;
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Christian Brevik]]></title><description><![CDATA[A blog from a developer living in Trondheim.]]></description><link>https://cbrevik.com</link><generator>RSS for Node</generator><lastBuildDate>Sat, 17 Nov 2018 21:16:53 GMT</lastBuildDate><item><title><![CDATA[React Native and the Array.reverse bug]]></title><description><![CDATA[The news that broke a couple of days ago about the  -bug that occurs in the newly released iOS 12 was  a bit  scary. I first learnt about it…]]></description><link>https://cbrevik.com/react-native-and-the-array-reverse-bug/</link><guid isPermaLink="false">https://cbrevik.com/react-native-and-the-array-reverse-bug/</guid><pubDate>Fri, 21 Sep 2018 09:59:00 GMT</pubDate><content:encoded>&lt;p&gt;The news that broke a couple of days ago about the &lt;code class=&quot;language-text&quot;&gt;Array.reverse&lt;/code&gt;-bug that occurs in the newly released iOS 12 was &lt;em&gt;a bit&lt;/em&gt; scary. I first learnt about it from &lt;a href=&quot;https://stackoverflow.com/questions/52390368/array-state-will-be-cached-in-ios-12-safari-is-it-a-bug-or-feature/&quot;&gt;this Stack Overflow-post&lt;/a&gt; by way of &lt;a href=&quot;https://news.ycombinator.com/item?id=18021835&quot;&gt;Hacker News&lt;/a&gt;.&lt;/p&gt;
 &lt;p&gt;Developers have experienced a JavaScript-bug in Safari iOS 12, where an &lt;code class=&quot;language-text&quot;&gt;Array.reverse&lt;/code&gt; will cache the &lt;code class=&quot;language-text&quot;&gt;Array&lt;/code&gt; value state, which will still remain reversed even if you reload the page. I think most developers will understand why that is a problem. And apparently the same error exists on macOS as well, not just iOS.&lt;/p&gt;
 &lt;p&gt;After researching it a bit more, I found that it’s a bit misleading to call it a “Safari bug” though, because the &lt;a href=&quot;https://bugs.webkit.org/show_bug.cgi?id=188794&quot;&gt;WebKit bug report&lt;/a&gt; suggests that it actually exists in the &lt;code class=&quot;language-text&quot;&gt;JavaScriptCore&lt;/code&gt;-framework. Having contributed a bit to the React Native (RN) framework, I quickly noticed that this might be trouble. Because the RN JavaScript-bundle actually runs inside the &lt;code class=&quot;language-text&quot;&gt;JavaScriptCore&lt;/code&gt;-framework on iOS!&lt;/p&gt;
 &lt;p&gt;I am currently working at &lt;a href=&quot;https://www.ice.no/&quot;&gt;Ice&lt;/a&gt; (the Norwegian mobile operator) on their app, which is made with RN, and knew I had to look into this right away.&lt;/p&gt;
@@ -9,7 +9,7 @@
 &lt;p&gt;
   &lt;a
     class=&quot;gatsby-resp-image-link&quot;
-    href=&quot;/static/red-1-7d5127cb50fb58391efab9a20fb33db2-a8524.png&quot;
+    href=&quot;/static/7d5127cb50fb58391efab9a20fb33db2/a8524/red-1.png&quot;
     style=&quot;display: block&quot;
     target=&quot;_blank&quot;
     rel=&quot;noopener&quot;
@@ -28,10 +28,10 @@
         style=&quot;width: 100%; height: 100%; margin: 0; vertical-align: middle; position: absolute; top: 0; left: 0; box-shadow: inset 0px 0px 0px 400px white;&quot;
         alt=&quot;The Array.reverse bug inside a React Native-app&quot;
         title=&quot;&quot;
-        src=&quot;/static/red-1-7d5127cb50fb58391efab9a20fb33db2-a8524.png&quot;
-        srcset=&quot;/static/red-1-7d5127cb50fb58391efab9a20fb33db2-bfbd1.png 148w,
-/static/red-1-7d5127cb50fb58391efab9a20fb33db2-f2961.png 295w,
-/static/red-1-7d5127cb50fb58391efab9a20fb33db2-a8524.png 375w&quot;
+        src=&quot;/static/7d5127cb50fb58391efab9a20fb33db2/a8524/red-1.png&quot;
+        srcset=&quot;/static/7d5127cb50fb58391efab9a20fb33db2/bfbd1/red-1.png 148w,
+/static/7d5127cb50fb58391efab9a20fb33db2/f2961/red-1.png 295w,
+/static/7d5127cb50fb58391efab9a20fb33db2/a8524/red-1.png 375w&quot;
         sizes=&quot;(max-width: 375px) 100vw, 375px&quot;
       /&gt;
     &lt;/span&gt;
@@ -55,7 +55,7 @@ AppRegistry.registerComponent(appName, () =&amp;gt; App);&lt;/code&gt;&lt;/pre&g
 &lt;p&gt;
   &lt;a
     class=&quot;gatsby-resp-image-link&quot;
-    href=&quot;/static/fixed-832dde755734838254325f18cde40bef-a8524.png&quot;
+    href=&quot;/static/832dde755734838254325f18cde40bef/a8524/fixed.png&quot;
     style=&quot;display: block&quot;
     target=&quot;_blank&quot;
     rel=&quot;noopener&quot;
@@ -74,10 +74,10 @@ AppRegistry.registerComponent(appName, () =&amp;gt; App);&lt;/code&gt;&lt;/pre&g
         style=&quot;width: 100%; height: 100%; margin: 0; vertical-align: middle; position: absolute; top: 0; left: 0; box-shadow: inset 0px 0px 0px 400px white;&quot;
         alt=&quot;fixed&quot;
         title=&quot;&quot;
-        src=&quot;/static/fixed-832dde755734838254325f18cde40bef-a8524.png&quot;
-        srcset=&quot;/static/fixed-832dde755734838254325f18cde40bef-bfbd1.png 148w,
-/static/fixed-832dde755734838254325f18cde40bef-f2961.png 295w,
-/static/fixed-832dde755734838254325f18cde40bef-a8524.png 375w&quot;
+        src=&quot;/static/832dde755734838254325f18cde40bef/a8524/fixed.png&quot;
+        srcset=&quot;/static/832dde755734838254325f18cde40bef/bfbd1/fixed.png 148w,
+/static/832dde755734838254325f18cde40bef/f2961/fixed.png 295w,
+/static/832dde755734838254325f18cde40bef/a8524/fixed.png 375w&quot;
         sizes=&quot;(max-width: 375px) 100vw, 375px&quot;
       /&gt;
     &lt;/span&gt;
@@ -243,7 +243,7 @@ if (Platform.Version === &amp;quot;12.0&amp;quot;) {
 &lt;p&gt;
   &lt;a
     class=&quot;gatsby-resp-image-link&quot;
-    href=&quot;/static/patch-1-271de3d1d77f0c68bf602f8ce8d1198b-dbeef.png&quot;
+    href=&quot;/static/271de3d1d77f0c68bf602f8ce8d1198b/dbeef/patch-1.png&quot;
     style=&quot;display: block&quot;
     target=&quot;_blank&quot;
     rel=&quot;noopener&quot;
@@ -262,13 +262,13 @@ if (Platform.Version === &amp;quot;12.0&amp;quot;) {
         style=&quot;width: 100%; height: 100%; margin: 0; vertical-align: middle; position: absolute; top: 0; left: 0; box-shadow: inset 0px 0px 0px 400px white;&quot;
         alt=&quot;patch file&quot;
         title=&quot;&quot;
-        src=&quot;/static/patch-1-271de3d1d77f0c68bf602f8ce8d1198b-fb8a0.png&quot;
-        srcset=&quot;/static/patch-1-271de3d1d77f0c68bf602f8ce8d1198b-1a291.png 148w,
-/static/patch-1-271de3d1d77f0c68bf602f8ce8d1198b-2bc4a.png 295w,
-/static/patch-1-271de3d1d77f0c68bf602f8ce8d1198b-fb8a0.png 590w,
-/static/patch-1-271de3d1d77f0c68bf602f8ce8d1198b-526de.png 885w,
-/static/patch-1-271de3d1d77f0c68bf602f8ce8d1198b-fa2eb.png 1180w,
-/static/patch-1-271de3d1d77f0c68bf602f8ce8d1198b-dbeef.png 1310w&quot;
+        src=&quot;/static/271de3d1d77f0c68bf602f8ce8d1198b/fb8a0/patch-1.png&quot;
+        srcset=&quot;/static/271de3d1d77f0c68bf602f8ce8d1198b/1a291/patch-1.png 148w,
+/static/271de3d1d77f0c68bf602f8ce8d1198b/2bc4a/patch-1.png 295w,
+/static/271de3d1d77f0c68bf602f8ce8d1198b/fb8a0/patch-1.png 590w,
+/static/271de3d1d77f0c68bf602f8ce8d1198b/526de/patch-1.png 885w,
+/static/271de3d1d77f0c68bf602f8ce8d1198b/fa2eb/patch-1.png 1180w,
+/static/271de3d1d77f0c68bf602f8ce8d1198b/dbeef/patch-1.png 1310w&quot;
         sizes=&quot;(max-width: 590px) 100vw, 590px&quot;
       /&gt;
     &lt;/span&gt;
@@ -332,7 +332,7 @@ patch-package: Applying patches...
 &lt;p&gt;Hope this will be of some help to others getting started on this course!&lt;/p&gt;</content:encoded></item><item><title><![CDATA[Intro to React Native (NDC Oslo 2017)]]></title><description><![CDATA[At  NDC Oslo 2017  I held a talk about React Native, which was basically an intro to the technology from a web developers perspective. If…]]></description><link>https://cbrevik.com/intro-to-react-native/</link><guid isPermaLink="false">https://cbrevik.com/intro-to-react-native/</guid><pubDate>Sat, 08 Jul 2017 15:02:00 GMT</pubDate><content:encoded>&lt;p&gt;
   &lt;a
     class=&quot;gatsby-resp-image-link&quot;
-    href=&quot;/static/DCbzOwlU0AIvrj3-jpg-large-97b6d84570de9e53f8b995a1d0bb461b-3f5a1.jpg&quot;
+    href=&quot;/static/97b6d84570de9e53f8b995a1d0bb461b/3f5a1/DCbzOwlU0AIvrj3-jpg-large.jpg&quot;
     style=&quot;display: block&quot;
     target=&quot;_blank&quot;
     rel=&quot;noopener&quot;
@@ -344,21 +344,21 @@ patch-package: Applying patches...
   &gt;
     &lt;span
       class=&quot;gatsby-resp-image-background-image&quot;
-      style=&quot;padding-bottom: 75%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/jpeg;base64,/9j/2wBDABALDA4MChAODQ4SERATGCgaGBYWGDEjJR0oOjM9PDkzODdASFxOQERXRTc4UG1RV19iZ2hnPk1xeXBkeFxlZ2P/2wBDARESEhgVGC8aGi9jQjhCY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2P/wgARCAAPABQDASIAAhEBAxEB/8QAGAAAAwEBAAAAAAAAAAAAAAAAAAIFAQT/xAAVAQEBAAAAAAAAAAAAAAAAAAADAv/aAAwDAQACEAMQAAABlp2YSThhI//EABoQAAIDAQEAAAAAAAAAAAAAAAABAgMREzH/2gAIAQEAAQUCjU2Otnh2w7bZY9l//8QAFhEAAwAAAAAAAAAAAAAAAAAAARAS/9oACAEDAQE/AZC//8QAFhEAAwAAAAAAAAAAAAAAAAAAARAS/9oACAECAQE/AaK//8QAGhAAAgIDAAAAAAAAAAAAAAAAESEAEAExcf/aAAgBAQAGPwJntODMOkK//8QAGRABAAMBAQAAAAAAAAAAAAAAAQARIUFh/9oACAEBAAE/ITMg8ZDl8iWQUkac+YdgLuLR0bn/2gAMAwEAAgADAAAAEKzf/8QAFhEBAQEAAAAAAAAAAAAAAAAAAREA/9oACAEDAQE/EEFLkjN//8QAGBEBAQADAAAAAAAAAAAAAAAAAQARIUH/2gAIAQIBAT8QF5GzN//EABoQAQEBAQEBAQAAAAAAAAAAAAERACExUdH/2gAIAQEAAT8Q6BElPX1xqWrAFeZXdUROmU4IcykdrpHqSD6z81BPMF7v/9k=&apos;); background-size: cover; display: block;&quot;
+      style=&quot;padding-bottom: 75%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/jpeg;base64,/9j/2wBDABALDA4MChAODQ4SERATGCgaGBYWGDEjJR0oOjM9PDkzODdASFxOQERXRTc4UG1RV19iZ2hnPk1xeXBkeFxlZ2P/2wBDARESEhgVGC8aGi9jQjhCY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2P/wgARCAAPABQDASIAAhEBAxEB/8QAGAAAAwEBAAAAAAAAAAAAAAAAAAIFAQT/xAAVAQEBAAAAAAAAAAAAAAAAAAADAv/aAAwDAQACEAMQAAABlp2YSThhI//EABoQAAIDAQEAAAAAAAAAAAAAAAABAgMREzH/2gAIAQEAAQUCjU2Otnh2w7bZY9l//8QAFhEAAwAAAAAAAAAAAAAAAAAAARAS/9oACAEDAQE/AZC//8QAFhEAAwAAAAAAAAAAAAAAAAAAARAS/9oACAECAQE/AaK//8QAGhAAAgIDAAAAAAAAAAAAAAAAESEAEAExcf/aAAgBAQAGPwJntODMOkK//8QAGRABAAMBAQAAAAAAAAAAAAAAAQARIUFh/9oACAEBAAE/ITMg8ZDF8iWQUkac+YdgLuLR0bn/2gAMAwEAAgADAAAAEKzf/8QAFhEBAQEAAAAAAAAAAAAAAAAAAREA/9oACAEDAQE/EEFLkjN//8QAGBEBAQADAAAAAAAAAAAAAAAAAQARIUH/2gAIAQIBAT8QF5GzN//EABoQAQEBAQEBAQAAAAAAAAAAAAERACExUdH/2gAIAQEAAT8QoFElPX1x6WrAFeZXdUROmU4IcykdrpHqSD6z81BPMF7v/9k=&apos;); background-size: cover; display: block;&quot;
     &gt;
       &lt;img
         class=&quot;gatsby-resp-image-image&quot;
         style=&quot;width: 100%; height: 100%; margin: 0; vertical-align: middle; position: absolute; top: 0; left: 0; box-shadow: inset 0px 0px 0px 400px white;&quot;
         alt=&quot;Talking at NDC Oslo 2017&quot;
         title=&quot;&quot;
-        src=&quot;/static/DCbzOwlU0AIvrj3-jpg-large-97b6d84570de9e53f8b995a1d0bb461b-f8fb9.jpg&quot;
-        srcset=&quot;/static/DCbzOwlU0AIvrj3-jpg-large-97b6d84570de9e53f8b995a1d0bb461b-e8976.jpg 148w,
-/static/DCbzOwlU0AIvrj3-jpg-large-97b6d84570de9e53f8b995a1d0bb461b-63df2.jpg 295w,
-/static/DCbzOwlU0AIvrj3-jpg-large-97b6d84570de9e53f8b995a1d0bb461b-f8fb9.jpg 590w,
-/static/DCbzOwlU0AIvrj3-jpg-large-97b6d84570de9e53f8b995a1d0bb461b-85e3d.jpg 885w,
-/static/DCbzOwlU0AIvrj3-jpg-large-97b6d84570de9e53f8b995a1d0bb461b-d1924.jpg 1180w,
-/static/DCbzOwlU0AIvrj3-jpg-large-97b6d84570de9e53f8b995a1d0bb461b-9452e.jpg 1770w,
-/static/DCbzOwlU0AIvrj3-jpg-large-97b6d84570de9e53f8b995a1d0bb461b-3f5a1.jpg 2048w&quot;
+        src=&quot;/static/97b6d84570de9e53f8b995a1d0bb461b/f8fb9/DCbzOwlU0AIvrj3-jpg-large.jpg&quot;
+        srcset=&quot;/static/97b6d84570de9e53f8b995a1d0bb461b/e8976/DCbzOwlU0AIvrj3-jpg-large.jpg 148w,
+/static/97b6d84570de9e53f8b995a1d0bb461b/63df2/DCbzOwlU0AIvrj3-jpg-large.jpg 295w,
+/static/97b6d84570de9e53f8b995a1d0bb461b/f8fb9/DCbzOwlU0AIvrj3-jpg-large.jpg 590w,
+/static/97b6d84570de9e53f8b995a1d0bb461b/85e3d/DCbzOwlU0AIvrj3-jpg-large.jpg 885w,
+/static/97b6d84570de9e53f8b995a1d0bb461b/d1924/DCbzOwlU0AIvrj3-jpg-large.jpg 1180w,
+/static/97b6d84570de9e53f8b995a1d0bb461b/9452e/DCbzOwlU0AIvrj3-jpg-large.jpg 1770w,
+/static/97b6d84570de9e53f8b995a1d0bb461b/3f5a1/DCbzOwlU0AIvrj3-jpg-large.jpg 2048w&quot;
         sizes=&quot;(max-width: 590px) 100vw, 590px&quot;
       /&gt;
     &lt;/span&gt;
@@ -477,7 +477,7 @@ The added benefit here is that you can connect your GTM containers to your Googl
 
   &lt;a
     class=&quot;gatsby-resp-image-link&quot;
-    href=&quot;/static/Screen-Shot-2016-04-24-at-14-14-35-37cfab24037ac9d2f37c559687789028-9c63f.png&quot;
+    href=&quot;/static/37cfab24037ac9d2f37c559687789028/9c63f/Screen-Shot-2016-04-24-at-14-14-35.png&quot;
     style=&quot;display: block&quot;
     target=&quot;_blank&quot;
     rel=&quot;noopener&quot;
@@ -496,12 +496,12 @@ The added benefit here is that you can connect your GTM containers to your Googl
         style=&quot;width: 100%; height: 100%; margin: 0; vertical-align: middle; position: absolute; top: 0; left: 0; box-shadow: inset 0px 0px 0px 400px white;&quot;
         alt=&quot;Content Experiment variations&quot;
         title=&quot;&quot;
-        src=&quot;/static/Screen-Shot-2016-04-24-at-14-14-35-37cfab24037ac9d2f37c559687789028-fb8a0.png&quot;
-        srcset=&quot;/static/Screen-Shot-2016-04-24-at-14-14-35-37cfab24037ac9d2f37c559687789028-1a291.png 148w,
-/static/Screen-Shot-2016-04-24-at-14-14-35-37cfab24037ac9d2f37c559687789028-2bc4a.png 295w,
-/static/Screen-Shot-2016-04-24-at-14-14-35-37cfab24037ac9d2f37c559687789028-fb8a0.png 590w,
-/static/Screen-Shot-2016-04-24-at-14-14-35-37cfab24037ac9d2f37c559687789028-526de.png 885w,
-/static/Screen-Shot-2016-04-24-at-14-14-35-37cfab24037ac9d2f37c559687789028-9c63f.png 1132w&quot;
+        src=&quot;/static/37cfab24037ac9d2f37c559687789028/fb8a0/Screen-Shot-2016-04-24-at-14-14-35.png&quot;
+        srcset=&quot;/static/37cfab24037ac9d2f37c559687789028/1a291/Screen-Shot-2016-04-24-at-14-14-35.png 148w,
+/static/37cfab24037ac9d2f37c559687789028/2bc4a/Screen-Shot-2016-04-24-at-14-14-35.png 295w,
+/static/37cfab24037ac9d2f37c559687789028/fb8a0/Screen-Shot-2016-04-24-at-14-14-35.png 590w,
+/static/37cfab24037ac9d2f37c559687789028/526de/Screen-Shot-2016-04-24-at-14-14-35.png 885w,
+/static/37cfab24037ac9d2f37c559687789028/9c63f/Screen-Shot-2016-04-24-at-14-14-35.png 1132w&quot;
         sizes=&quot;(max-width: 590px) 100vw, 590px&quot;
       /&gt;
     &lt;/span&gt;
@@ -522,7 +522,7 @@ GoogleTagManager&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&l
 
   &lt;a
     class=&quot;gatsby-resp-image-link&quot;
-    href=&quot;/static/Screen-Shot-2016-04-24-at-14-33-59-b37f97c458d727712790e59bf785e39b-59197.png&quot;
+    href=&quot;/static/b37f97c458d727712790e59bf785e39b/59197/Screen-Shot-2016-04-24-at-14-33-59.png&quot;
     style=&quot;display: block&quot;
     target=&quot;_blank&quot;
     rel=&quot;noopener&quot;
@@ -541,11 +541,11 @@ GoogleTagManager&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&l
         style=&quot;width: 100%; height: 100%; margin: 0; vertical-align: middle; position: absolute; top: 0; left: 0; box-shadow: inset 0px 0px 0px 400px white;&quot;
         alt=&quot;Ecommerce Purchase goal setup&quot;
         title=&quot;&quot;
-        src=&quot;/static/Screen-Shot-2016-04-24-at-14-33-59-b37f97c458d727712790e59bf785e39b-fb8a0.png&quot;
-        srcset=&quot;/static/Screen-Shot-2016-04-24-at-14-33-59-b37f97c458d727712790e59bf785e39b-1a291.png 148w,
-/static/Screen-Shot-2016-04-24-at-14-33-59-b37f97c458d727712790e59bf785e39b-2bc4a.png 295w,
-/static/Screen-Shot-2016-04-24-at-14-33-59-b37f97c458d727712790e59bf785e39b-fb8a0.png 590w,
-/static/Screen-Shot-2016-04-24-at-14-33-59-b37f97c458d727712790e59bf785e39b-59197.png 882w&quot;
+        src=&quot;/static/b37f97c458d727712790e59bf785e39b/fb8a0/Screen-Shot-2016-04-24-at-14-33-59.png&quot;
+        srcset=&quot;/static/b37f97c458d727712790e59bf785e39b/1a291/Screen-Shot-2016-04-24-at-14-33-59.png 148w,
+/static/b37f97c458d727712790e59bf785e39b/2bc4a/Screen-Shot-2016-04-24-at-14-33-59.png 295w,
+/static/b37f97c458d727712790e59bf785e39b/fb8a0/Screen-Shot-2016-04-24-at-14-33-59.png 590w,
+/static/b37f97c458d727712790e59bf785e39b/59197/Screen-Shot-2016-04-24-at-14-33-59.png 882w&quot;
         sizes=&quot;(max-width: 590px) 100vw, 590px&quot;
       /&gt;
     &lt;/span&gt;
@@ -616,7 +616,7 @@ Among many other things it; makes execution timeouts infinite, disables many opt
 &lt;p&gt;
   &lt;a
     class=&quot;gatsby-resp-image-link&quot;
-    href=&quot;/static/Buildconfig-53f752c82670405655ac85fdca2697df-42a1a.png&quot;
+    href=&quot;/static/53f752c82670405655ac85fdca2697df/42a1a/Buildconfig.png&quot;
     style=&quot;display: block&quot;
     target=&quot;_blank&quot;
     rel=&quot;noopener&quot;
@@ -635,11 +635,11 @@ Among many other things it; makes execution timeouts infinite, disables many opt
         style=&quot;width: 100%; height: 100%; margin: 0; vertical-align: middle; position: absolute; top: 0; left: 0; box-shadow: inset 0px 0px 0px 400px white;&quot;
         alt=&quot;Select the relevant build configuration&quot;
         title=&quot;&quot;
-        src=&quot;/static/Buildconfig-53f752c82670405655ac85fdca2697df-fb8a0.png&quot;
-        srcset=&quot;/static/Buildconfig-53f752c82670405655ac85fdca2697df-1a291.png 148w,
-/static/Buildconfig-53f752c82670405655ac85fdca2697df-2bc4a.png 295w,
-/static/Buildconfig-53f752c82670405655ac85fdca2697df-fb8a0.png 590w,
-/static/Buildconfig-53f752c82670405655ac85fdca2697df-42a1a.png 726w&quot;
+        src=&quot;/static/53f752c82670405655ac85fdca2697df/fb8a0/Buildconfig.png&quot;
+        srcset=&quot;/static/53f752c82670405655ac85fdca2697df/1a291/Buildconfig.png 148w,
+/static/53f752c82670405655ac85fdca2697df/2bc4a/Buildconfig.png 295w,
+/static/53f752c82670405655ac85fdca2697df/fb8a0/Buildconfig.png 590w,
+/static/53f752c82670405655ac85fdca2697df/42a1a/Buildconfig.png 726w&quot;
         sizes=&quot;(max-width: 590px) 100vw, 590px&quot;
       /&gt;
     &lt;/span&gt;
@@ -652,7 +652,7 @@ Among many other things it; makes execution timeouts infinite, disables many opt
 &lt;p&gt;
   &lt;a
     class=&quot;gatsby-resp-image-link&quot;
-    href=&quot;/static/advbuildsettings-f57ec4135d352c7b7e24429bc0b30903-04f9d.png&quot;
+    href=&quot;/static/f57ec4135d352c7b7e24429bc0b30903/04f9d/advbuildsettings.png&quot;
     style=&quot;display: block&quot;
     target=&quot;_blank&quot;
     rel=&quot;noopener&quot;
@@ -671,10 +671,10 @@ Among many other things it; makes execution timeouts infinite, disables many opt
         style=&quot;width: 100%; height: 100%; margin: 0; vertical-align: middle; position: absolute; top: 0; left: 0; box-shadow: inset 0px 0px 0px 400px white;&quot;
         alt=&quot;Change the debug info&quot;
         title=&quot;&quot;
-        src=&quot;/static/advbuildsettings-f57ec4135d352c7b7e24429bc0b30903-04f9d.png&quot;
-        srcset=&quot;/static/advbuildsettings-f57ec4135d352c7b7e24429bc0b30903-dc4e8.png 148w,
-/static/advbuildsettings-f57ec4135d352c7b7e24429bc0b30903-29209.png 295w,
-/static/advbuildsettings-f57ec4135d352c7b7e24429bc0b30903-04f9d.png 512w&quot;
+        src=&quot;/static/f57ec4135d352c7b7e24429bc0b30903/04f9d/advbuildsettings.png&quot;
+        srcset=&quot;/static/f57ec4135d352c7b7e24429bc0b30903/dc4e8/advbuildsettings.png 148w,
+/static/f57ec4135d352c7b7e24429bc0b30903/29209/advbuildsettings.png 295w,
+/static/f57ec4135d352c7b7e24429bc0b30903/04f9d/advbuildsettings.png 512w&quot;
         sizes=&quot;(max-width: 512px) 100vw, 512px&quot;
       /&gt;
     &lt;/span&gt;
@@ -696,7 +696,7 @@ Among many other things it; makes execution timeouts infinite, disables many opt
 &lt;p&gt;
   &lt;a
     class=&quot;gatsby-resp-image-link&quot;
-    href=&quot;/static/excludesymbols-02a8d571b2171afd00df9b5442cb87a0-1e685.png&quot;
+    href=&quot;/static/02a8d571b2171afd00df9b5442cb87a0/1e685/excludesymbols.png&quot;
     style=&quot;display: block&quot;
     target=&quot;_blank&quot;
     rel=&quot;noopener&quot;
@@ -715,10 +715,10 @@ Among many other things it; makes execution timeouts infinite, disables many opt
         style=&quot;width: 100%; height: 100%; margin: 0; vertical-align: middle; position: absolute; top: 0; left: 0; box-shadow: inset 0px 0px 0px 400px white;&quot;
         alt=&quot;Uncheck exclude&quot;
         title=&quot;&quot;
-        src=&quot;/static/excludesymbols-02a8d571b2171afd00df9b5442cb87a0-1e685.png&quot;
-        srcset=&quot;/static/excludesymbols-02a8d571b2171afd00df9b5442cb87a0-9b682.png 148w,
-/static/excludesymbols-02a8d571b2171afd00df9b5442cb87a0-ef5d6.png 295w,
-/static/excludesymbols-02a8d571b2171afd00df9b5442cb87a0-1e685.png 510w&quot;
+        src=&quot;/static/02a8d571b2171afd00df9b5442cb87a0/1e685/excludesymbols.png&quot;
+        srcset=&quot;/static/02a8d571b2171afd00df9b5442cb87a0/9b682/excludesymbols.png 148w,
+/static/02a8d571b2171afd00df9b5442cb87a0/ef5d6/excludesymbols.png 295w,
+/static/02a8d571b2171afd00df9b5442cb87a0/1e685/excludesymbols.png 510w&quot;
         sizes=&quot;(max-width: 510px) 100vw, 510px&quot;
       /&gt;
     &lt;/span&gt;
@@ -746,7 +746,7 @@ Among many other things it; makes execution timeouts infinite, disables many opt
 &lt;p&gt;
   &lt;a
     class=&quot;gatsby-resp-image-link&quot;
-    href=&quot;/static/winfirewall-918d365a3c85e65d6dc5f197b14f3fc3-b7cef.png&quot;
+    href=&quot;/static/918d365a3c85e65d6dc5f197b14f3fc3/b7cef/winfirewall.png&quot;
     style=&quot;display: block&quot;
     target=&quot;_blank&quot;
     rel=&quot;noopener&quot;
@@ -765,11 +765,11 @@ Among many other things it; makes execution timeouts infinite, disables many opt
         style=&quot;width: 100%; height: 100%; margin: 0; vertical-align: middle; position: absolute; top: 0; left: 0; box-shadow: inset 0px 0px 0px 400px white;&quot;
         alt=&quot;Windows firewall inbound rule&quot;
         title=&quot;&quot;
-        src=&quot;/static/winfirewall-918d365a3c85e65d6dc5f197b14f3fc3-fb8a0.png&quot;
-        srcset=&quot;/static/winfirewall-918d365a3c85e65d6dc5f197b14f3fc3-1a291.png 148w,
-/static/winfirewall-918d365a3c85e65d6dc5f197b14f3fc3-2bc4a.png 295w,
-/static/winfirewall-918d365a3c85e65d6dc5f197b14f3fc3-fb8a0.png 590w,
-/static/winfirewall-918d365a3c85e65d6dc5f197b14f3fc3-b7cef.png 826w&quot;
+        src=&quot;/static/918d365a3c85e65d6dc5f197b14f3fc3/fb8a0/winfirewall.png&quot;
+        srcset=&quot;/static/918d365a3c85e65d6dc5f197b14f3fc3/1a291/winfirewall.png 148w,
+/static/918d365a3c85e65d6dc5f197b14f3fc3/2bc4a/winfirewall.png 295w,
+/static/918d365a3c85e65d6dc5f197b14f3fc3/fb8a0/winfirewall.png 590w,
+/static/918d365a3c85e65d6dc5f197b14f3fc3/b7cef/winfirewall.png 826w&quot;
         sizes=&quot;(max-width: 590px) 100vw, 590px&quot;
       /&gt;
     &lt;/span&gt;
@@ -783,7 +783,7 @@ Now go to Tools &gt; Options and set authentication mode to Windows Authenticati
 &lt;p&gt;
   &lt;a
     class=&quot;gatsby-resp-image-link&quot;
-    href=&quot;/static/remotetoolsoptions-cd2f0b358949efe0d6c86554f01f3864-99108.png&quot;
+    href=&quot;/static/cd2f0b358949efe0d6c86554f01f3864/99108/remotetoolsoptions.png&quot;
     style=&quot;display: block&quot;
     target=&quot;_blank&quot;
     rel=&quot;noopener&quot;
@@ -802,10 +802,10 @@ Now go to Tools &gt; Options and set authentication mode to Windows Authenticati
         style=&quot;width: 100%; height: 100%; margin: 0; vertical-align: middle; position: absolute; top: 0; left: 0; box-shadow: inset 0px 0px 0px 400px white;&quot;
         alt=&quot;Remote tools options&quot;
         title=&quot;&quot;
-        src=&quot;/static/remotetoolsoptions-cd2f0b358949efe0d6c86554f01f3864-99108.png&quot;
-        srcset=&quot;/static/remotetoolsoptions-cd2f0b358949efe0d6c86554f01f3864-a3440.png 148w,
-/static/remotetoolsoptions-cd2f0b358949efe0d6c86554f01f3864-90288.png 295w,
-/static/remotetoolsoptions-cd2f0b358949efe0d6c86554f01f3864-99108.png 422w&quot;
+        src=&quot;/static/cd2f0b358949efe0d6c86554f01f3864/99108/remotetoolsoptions.png&quot;
+        srcset=&quot;/static/cd2f0b358949efe0d6c86554f01f3864/a3440/remotetoolsoptions.png 148w,
+/static/cd2f0b358949efe0d6c86554f01f3864/90288/remotetoolsoptions.png 295w,
+/static/cd2f0b358949efe0d6c86554f01f3864/99108/remotetoolsoptions.png 422w&quot;
         sizes=&quot;(max-width: 422px) 100vw, 422px&quot;
       /&gt;
     &lt;/span&gt;
@@ -831,7 +831,7 @@ Again Visual Studio will not let you authenticate here, so you should do it manu
 &lt;p&gt;
   &lt;a
     class=&quot;gatsby-resp-image-link&quot;
-    href=&quot;/static/symbols-ed5de66fa00f74e2a3216731440782be-45fcc.png&quot;
+    href=&quot;/static/ed5de66fa00f74e2a3216731440782be/45fcc/symbols.png&quot;
     style=&quot;display: block&quot;
     target=&quot;_blank&quot;
     rel=&quot;noopener&quot;
@@ -850,11 +850,11 @@ Again Visual Studio will not let you authenticate here, so you should do it manu
         style=&quot;width: 100%; height: 100%; margin: 0; vertical-align: middle; position: absolute; top: 0; left: 0; box-shadow: inset 0px 0px 0px 400px white;&quot;
         alt=&quot;Symbols define network path&quot;
         title=&quot;&quot;
-        src=&quot;/static/symbols-ed5de66fa00f74e2a3216731440782be-fb8a0.png&quot;
-        srcset=&quot;/static/symbols-ed5de66fa00f74e2a3216731440782be-1a291.png 148w,
-/static/symbols-ed5de66fa00f74e2a3216731440782be-2bc4a.png 295w,
-/static/symbols-ed5de66fa00f74e2a3216731440782be-fb8a0.png 590w,
-/static/symbols-ed5de66fa00f74e2a3216731440782be-45fcc.png 758w&quot;
+        src=&quot;/static/ed5de66fa00f74e2a3216731440782be/fb8a0/symbols.png&quot;
+        srcset=&quot;/static/ed5de66fa00f74e2a3216731440782be/1a291/symbols.png 148w,
+/static/ed5de66fa00f74e2a3216731440782be/2bc4a/symbols.png 295w,
+/static/ed5de66fa00f74e2a3216731440782be/fb8a0/symbols.png 590w,
+/static/ed5de66fa00f74e2a3216731440782be/45fcc/symbols.png 758w&quot;
         sizes=&quot;(max-width: 590px) 100vw, 590px&quot;
       /&gt;
     &lt;/span&gt;
@@ -870,7 +870,7 @@ The Transport should be Default. In the Qualifier (where your computer name prob
 &lt;p&gt;
   &lt;a
     class=&quot;gatsby-resp-image-link&quot;
-    href=&quot;/static/attachstep1-179b696f40ee335bc96de26ec56340e6-1fe17.png&quot;
+    href=&quot;/static/179b696f40ee335bc96de26ec56340e6/1fe17/attachstep1.png&quot;
     style=&quot;display: block&quot;
     target=&quot;_blank&quot;
     rel=&quot;noopener&quot;
@@ -889,11 +889,11 @@ The Transport should be Default. In the Qualifier (where your computer name prob
         style=&quot;width: 100%; height: 100%; margin: 0; vertical-align: middle; position: absolute; top: 0; left: 0; box-shadow: inset 0px 0px 0px 400px white;&quot;
         alt=&quot;Attach to process step 1&quot;
         title=&quot;&quot;
-        src=&quot;/static/attachstep1-179b696f40ee335bc96de26ec56340e6-fb8a0.png&quot;
-        srcset=&quot;/static/attachstep1-179b696f40ee335bc96de26ec56340e6-1a291.png 148w,
-/static/attachstep1-179b696f40ee335bc96de26ec56340e6-2bc4a.png 295w,
-/static/attachstep1-179b696f40ee335bc96de26ec56340e6-fb8a0.png 590w,
-/static/attachstep1-179b696f40ee335bc96de26ec56340e6-1fe17.png 869w&quot;
+        src=&quot;/static/179b696f40ee335bc96de26ec56340e6/fb8a0/attachstep1.png&quot;
+        srcset=&quot;/static/179b696f40ee335bc96de26ec56340e6/1a291/attachstep1.png 148w,
+/static/179b696f40ee335bc96de26ec56340e6/2bc4a/attachstep1.png 295w,
+/static/179b696f40ee335bc96de26ec56340e6/fb8a0/attachstep1.png 590w,
+/static/179b696f40ee335bc96de26ec56340e6/1fe17/attachstep1.png 869w&quot;
         sizes=&quot;(max-width: 590px) 100vw, 590px&quot;
       /&gt;
     &lt;/span&gt;
