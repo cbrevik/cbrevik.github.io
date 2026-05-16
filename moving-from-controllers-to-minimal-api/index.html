@@ -1,0 +1,257 @@
+<!DOCTYPE html><html lang="en"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" type="image/png" href="/favicon.png"><meta name="generator" content="Astro v4.16.19"><title>Moving from Controllers to Minimal API | Christian Brevik</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@700&display=swap" rel="stylesheet"><link rel="alternate" type="application/rss+xml" title="Christian Brevik" href="/rss.xml"><style>*,*:before,*:after{box-sizing:border-box}html{font-family:Merriweather,Georgia,serif;font-size:18px;line-height:1.75;color:#000c}body{margin:0;background:#fff}.container{margin:0 auto;max-width:42rem;padding:2.625rem 1.3125rem}h1,h2,h3,h4,h5,h6{font-family:Montserrat,sans-serif;line-height:1.1}h1{font-size:2.5rem;margin-top:0;margin-bottom:1.75rem}h2{font-size:1.75rem;margin-top:2.625rem;margin-bottom:1.3125rem}h3{font-size:1.3125rem;margin-top:2.625rem;margin-bottom:.4375rem}a{color:inherit}p{margin:0 0 1.75rem}code{font-family:Consolas,Monaco,Lucida Console,monospace;font-size:.85em;background:#0000000d;padding:.2em .4em;border-radius:3px}pre{margin:0 0 1.75rem;padding:1rem 1.25rem;overflow-x:auto;border-radius:6px;position:relative;line-height:1.4}pre.astro-code{background-color:#f6f8fa!important;border:1px solid #e1e4e8}.copy-button{position:absolute;top:.5rem;right:.5rem;padding:.2rem .5rem;font-size:.75rem;font-family:Montserrat,sans-serif;background:#ffffffd9;border:1px solid rgba(0,0,0,.15);border-radius:4px;cursor:pointer;opacity:0;transition:opacity .15s;line-height:1.5}pre:hover .copy-button{opacity:1}.copy-button:active{background:#fff}pre code{background:none;padding:0;font-size:.85rem}pre .line{line-height:1.3}blockquote{margin:0 0 1.75rem;padding:0 0 0 1.3125rem;border-left:.28rem solid rgba(0,0,0,.2);font-style:italic;color:#00000096}blockquote p:last-child{margin-bottom:0}img{max-width:100%;height:auto}hr{margin:0 0 1.75rem;border:none;border-bottom:1px solid rgba(0,0,0,.1)}ul,ol{margin:0 0 1.75rem;padding-left:1.75rem}li{margin-bottom:.4375rem}table{border-collapse:collapse;width:100%;margin:0 0 1.75rem}th,td{padding:.4375rem .875rem;border:1px solid rgba(0,0,0,.12);text-align:left}th{font-family:Montserrat,sans-serif;background:#0000000a}.footnotes{font-size:.875rem;color:#00000096;border-top:1px solid rgba(0,0,0,.1);margin-top:1.75rem;padding-top:.875rem}.site-title-large{font-family:Montserrat,sans-serif;font-size:2.5rem;margin-bottom:1.75rem;margin-top:0}.site-title-small{font-family:Montserrat,sans-serif;font-size:1.3125rem;margin-top:0;margin-bottom:2.625rem}.site-title-large a,.site-title-small a{box-shadow:none;text-decoration:none;color:inherit}.bio{display:flex;align-items:flex-start;margin-bottom:4.375rem}.bio img{width:3.5rem;height:3.5rem;border-radius:50%;margin-right:.875rem;margin-bottom:0;flex-shrink:0}.bio p{margin:0}.post-list-item{margin-bottom:2.625rem}.post-list-item h3{margin-top:0;margin-bottom:.4375rem}.post-list-item h3 a{text-decoration:none}.post-date{display:block;margin-bottom:1.75rem;margin-top:0;font-size:.875rem;color:#00000096}.post-content img{display:block;margin-left:auto;margin-right:auto;margin-bottom:1.75rem}.post-nav{display:flex;flex-wrap:wrap;justify-content:space-between;list-style:none;padding:0;margin:0}.post-nav li a{text-decoration:none}.post-nav li a:hover{text-decoration:underline}
+</style><script type="module">document.querySelectorAll("pre").forEach(e=>{const t=document.createElement("button");t.className="copy-button",t.textContent="Copy",t.addEventListener("click",async()=>{const n=e.querySelector("code");await navigator.clipboard.writeText(n?.innerText??""),t.textContent="Copied!",setTimeout(()=>{t.textContent="Copy"},2e3)}),e.appendChild(t)});
+</script></head> <body> <div class="container">  <h3 class="site-title-small"> <a href="/">Christian Brevik</a> </h3> <h1>Moving from Controllers to Minimal API</h1> <span class="post-date">May 3, 2024</span> <div class="post-content"> <blockquote>
+<p>This post was originally published on <a href="https://blog.variant.no/moving-from-controllers-to-minimal-api-bda56a223cc8">Variant’s blog</a>.</p>
+</blockquote>
+<p>If you’re used to MVC Controllers, and want to know how to use the new Minimal API in ASP.NET Core in a way that doesn’t feel painful, this is the post for you!</p>
+<p>When you look at examples of Minimal API, you’ll see a lot of code that looks like this:</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="csharp"><code><span class="line"><span style="color:#D73A49">var</span><span style="color:#6F42C1"> builder</span><span style="color:#D73A49"> =</span><span style="color:#24292E"> WebApplication.</span><span style="color:#6F42C1">CreateBuilder</span><span style="color:#24292E">(args);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49">var</span><span style="color:#6F42C1"> app</span><span style="color:#D73A49"> =</span><span style="color:#24292E"> builder.</span><span style="color:#6F42C1">Build</span><span style="color:#24292E">();</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E">app.</span><span style="color:#6F42C1">MapGet</span><span style="color:#24292E">(</span><span style="color:#032F62">"/"</span><span style="color:#24292E">, () </span><span style="color:#D73A49">=></span><span style="color:#032F62"> "Hello World!"</span><span style="color:#24292E">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E">app.</span><span style="color:#6F42C1">Run</span><span style="color:#24292E">();</span></span>
+<span class="line"></span></code></pre>
+<p>This is of course very different from how you would build APIs with traditional MVC Controllers. And at the same time, examples like these seem very naive and simplistic. Should you put all your routes (<code>app.MapGet</code>, <code>app.MapPost</code>, etc) in <code>Program.cs</code>, and handle the endpoint logic inline with lambda functions (like with <code>() => "Hello World!"</code>) there as well?</p>
+<p>You’re probably thinking, that’s going to end up being a mess. And you’d be right! This does not translate well to APIs with many endpoints and more logic.</p>
+<p>Coming from Controllers, you’re used to having a controller-class for each route prefix, and having an Action-method for each endpoint under that prefix. You’re used to having a clear separation of concerns, and you’re used to having a way to organize your code files in a way that makes sense.</p>
+<p>So how do you do that with Minimal API?</p>
+<h2 id="for-the-impatient-heres-the-code">For the impatient, here’s the code</h2>
+<p>If you’re the type of person who likes to read code rather than posts, I’ve created an example project that demonstrates the pattern I’m suggesting. You can find it on GitHub at <a href="https://github.com/varianter/dotnet-template">https://github.com/varianter/dotnet-template</a>. The solution itself has a lot more moving parts than what I’ll show here, but the pattern I’ll describe is used in the <code>Api</code>-project.</p>
+<p>The most interesting files pertaining to this post are under <a href="https://github.com/varianter/dotnet-template/tree/main/src/Api/Routes"><code>src/Api/Routes</code></a>. Where <code>RouteGroupBuilderExtensions</code> has encapsulation of common behaviours for endpoints, and the <code>Weather</code>-folder shows the file structure for endpoint-groups, the endpoints themselves, and the request/response models used.</p>
+<p>I would still recommend reading the rest of this post to understand my choices. 😅</p>
+<h2 id="translating-controllers-to-minimal-api">Translating Controllers to Minimal API</h2>
+<p>The main difference between Minimal API and Controllers is that you don’t have a controller class as a container for your endpoints with Minimal API. For Controllers you would typically have a class like this:</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="csharp"><code><span class="line"><span style="color:#24292E">[</span><span style="color:#6F42C1">ApiController</span><span style="color:#24292E">]</span></span>
+<span class="line"><span style="color:#24292E">[</span><span style="color:#6F42C1">Route</span><span style="color:#24292E">(</span><span style="color:#032F62">"[controller]"</span><span style="color:#24292E">)]</span></span>
+<span class="line"><span style="color:#D73A49">public</span><span style="color:#D73A49"> class</span><span style="color:#6F42C1"> HelloController</span><span style="color:#24292E"> : </span><span style="color:#6F42C1">ControllerBase</span></span>
+<span class="line"><span style="color:#24292E">{</span></span>
+<span class="line"><span style="color:#D73A49">    private</span><span style="color:#D73A49"> readonly</span><span style="color:#6F42C1"> IHelloService</span><span style="color:#6F42C1"> _helloService</span><span style="color:#24292E">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49">    public</span><span style="color:#6F42C1"> HelloController</span><span style="color:#24292E">(</span><span style="color:#6F42C1">IHelloService</span><span style="color:#6F42C1"> helloService</span><span style="color:#24292E">)</span></span>
+<span class="line"><span style="color:#24292E">    {</span></span>
+<span class="line"><span style="color:#24292E">        _helloService </span><span style="color:#D73A49">=</span><span style="color:#24292E"> helloService;</span></span>
+<span class="line"><span style="color:#24292E">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49">    public</span><span style="color:#6F42C1"> IActionResult</span><span style="color:#6F42C1"> Get</span><span style="color:#24292E">()</span></span>
+<span class="line"><span style="color:#24292E">    {</span></span>
+<span class="line"><span style="color:#D73A49">        return</span><span style="color:#6F42C1"> Ok</span><span style="color:#24292E">(_helloService.</span><span style="color:#6F42C1">FetchHello</span><span style="color:#24292E">());</span></span>
+<span class="line"><span style="color:#24292E">    }</span></span>
+<span class="line"><span style="color:#24292E">}</span></span>
+<span class="line"></span></code></pre>
+<p>A thing to think about with Controllers is there are many different conventions for defining routes, some of them more magical than others.</p>
+<p>In the above example, the reason why the <code>Get</code>-method responds when you call <code>GET /hello</code>, is because it is located in a class named <code>HelloController</code>, where by convention the <code>Controller</code>-part of the name is removed and then resolves as the URL-prefix <code>/hello</code>. And then, also by naming convention, the <code>Get()</code>-method will respond to the <code>hello</code> route if you use the HTTP-verb <code>GET</code> because the method is named <code>Get</code>.</p>
+<p>There are of course ways of doing this more explicit, by for example adding attributes like <code>[Route]</code> for routing and <code>[HttpGet]</code> or similar for the verbs. But the point is that much of the routing that happens with Controllers are by default implicit. And this can get very difficult to keep track of when you have many endpoints.</p>
+<p>The terseness is what many people talk about when they say they prefer Minimal API, but the main reason for me is how explicit it forces you to be about your routes and verbs. The same code in Minimal API would look like this:</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="csharp"><code><span class="line"><span style="color:#6A737D">// Program.cs</span></span>
+<span class="line"><span style="color:#24292E">app.</span><span style="color:#6F42C1">MapGet</span><span style="color:#24292E">(</span><span style="color:#032F62">"/hello"</span><span style="color:#24292E">, (</span><span style="color:#6F42C1">IHelloService</span><span style="color:#6F42C1"> helloService</span><span style="color:#24292E">) </span><span style="color:#D73A49">=></span><span style="color:#24292E"> helloService.</span><span style="color:#6F42C1">FetchHello</span><span style="color:#24292E">());</span></span>
+<span class="line"></span></code></pre>
+<p>But what if you don’t want to inline all your logic like this? One strength of Controllers is that you have a clear separation of concerns and it forces you to structure your code across multiple files.</p>
+<p>Well one way to solve this with Minimal API is to move the routing to extension methods. You can create extension methods for <code>WebApplication</code> that encapsulate the logic for each endpoint, and in this way keep your <code>Program.cs</code> clean and organized:</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="csharp"><code><span class="line"><span style="color:#D73A49">public</span><span style="color:#D73A49"> static</span><span style="color:#D73A49"> class</span><span style="color:#6F42C1"> HelloEndpoints</span></span>
+<span class="line"><span style="color:#24292E">{</span></span>
+<span class="line"><span style="color:#D73A49">    public</span><span style="color:#D73A49"> static</span><span style="color:#D73A49"> void</span><span style="color:#6F42C1"> MapHelloEndpoints</span><span style="color:#24292E">(</span><span style="color:#D73A49">this</span><span style="color:#6F42C1"> WebApplication</span><span style="color:#6F42C1"> app</span><span style="color:#24292E">)</span></span>
+<span class="line"><span style="color:#24292E">    {</span></span>
+<span class="line"><span style="color:#24292E">        app.</span><span style="color:#6F42C1">MapGet</span><span style="color:#24292E">(</span><span style="color:#032F62">"/hello"</span><span style="color:#24292E">, (</span><span style="color:#6F42C1">IHelloService</span><span style="color:#6F42C1"> helloService</span><span style="color:#24292E">) </span><span style="color:#D73A49">=></span><span style="color:#24292E"> helloService.</span><span style="color:#6F42C1">FetchHello</span><span style="color:#24292E">());</span></span>
+<span class="line"><span style="color:#24292E">    }</span></span>
+<span class="line"><span style="color:#24292E">}</span></span>
+<span class="line"></span></code></pre>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="csharp"><code><span class="line"><span style="color:#6A737D">// Program.cs</span></span>
+<span class="line"><span style="color:#24292E">app.</span><span style="color:#6F42C1">MapHelloEndpoints</span><span style="color:#24292E">();</span></span>
+<span class="line"></span></code></pre>
+<p>But that just moves the problem to another file. This doesn’t scale well with multiple endpoints and longer handler methods.</p>
+<p>If you do a small tweak to the code above though, it starts to look more like what you’re used to with Controllers and an Action-method per endpoint:</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="csharp"><code><span class="line"><span style="color:#D73A49">public</span><span style="color:#D73A49"> static</span><span style="color:#D73A49"> class</span><span style="color:#6F42C1"> HelloEndpoints</span></span>
+<span class="line"><span style="color:#24292E">{</span></span>
+<span class="line"><span style="color:#D73A49">    public</span><span style="color:#D73A49"> static</span><span style="color:#D73A49"> void</span><span style="color:#6F42C1"> MapHelloEndpoints</span><span style="color:#24292E">(</span><span style="color:#D73A49">this</span><span style="color:#6F42C1"> WebApplication</span><span style="color:#6F42C1"> app</span><span style="color:#24292E">)</span></span>
+<span class="line"><span style="color:#24292E">    {</span></span>
+<span class="line"><span style="color:#24292E">        app.</span><span style="color:#6F42C1">MapGet</span><span style="color:#24292E">(</span><span style="color:#032F62">"/hello"</span><span style="color:#24292E">, GetHello);</span></span>
+<span class="line"><span style="color:#24292E">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49">    private</span><span style="color:#D73A49"> static</span><span style="color:#6F42C1"> GetHelloResponse</span><span style="color:#6F42C1"> GetHello</span><span style="color:#24292E">(</span><span style="color:#6F42C1">IHelloService</span><span style="color:#6F42C1"> helloService</span><span style="color:#24292E">)</span></span>
+<span class="line"><span style="color:#24292E">    {</span></span>
+<span class="line"><span style="color:#D73A49">        return</span><span style="color:#24292E"> helloService.</span><span style="color:#6F42C1">FetchHello</span><span style="color:#24292E">();</span></span>
+<span class="line"><span style="color:#24292E">    }</span></span>
+<span class="line"><span style="color:#24292E">}</span></span>
+<span class="line"></span></code></pre>
+<p>Here you can squint a bit and <code>GetHello</code> looks like an Action, and <code>HelloEndpoints</code> looks like a Controller-class. The main difference being that the service is injected into the method, rather than the constructor. Constructor dependency injection is not supported in Minimal API.</p>
+<h2 id="phew-that-was-easy-were-done-now-right">Phew! That was easy, we’re done now right?</h2>
+<p>Not quite. The code above is deceptively simple. With Controllers you add attributes to your classes and methods to define things like Authorization, OpenAPI documentation, etc.</p>
+<p>In Minimal API, you must instead chain method calls while building the routes to add these features. For example, to add authorization and OpenAPI documentation to the <code>GetHello</code> endpoint, you would do something like this:</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="csharp"><code><span class="line"><span style="color:#D73A49">public</span><span style="color:#D73A49"> static</span><span style="color:#D73A49"> class</span><span style="color:#6F42C1"> HelloEndpoints</span></span>
+<span class="line"><span style="color:#24292E">{</span></span>
+<span class="line"><span style="color:#D73A49">    public</span><span style="color:#D73A49"> static</span><span style="color:#D73A49"> void</span><span style="color:#6F42C1"> MapHelloEndpoints</span><span style="color:#24292E">(</span><span style="color:#D73A49">this</span><span style="color:#6F42C1"> WebApplication</span><span style="color:#6F42C1"> app</span><span style="color:#24292E">)</span></span>
+<span class="line"><span style="color:#24292E">    {</span></span>
+<span class="line"><span style="color:#24292E">        app.</span><span style="color:#6F42C1">MapGet</span><span style="color:#24292E">(</span><span style="color:#032F62">"/hello"</span><span style="color:#24292E">, GetHello)</span></span>
+<span class="line"><span style="color:#24292E">            .</span><span style="color:#6F42C1">RequireAuthorization</span><span style="color:#24292E">()</span></span>
+<span class="line"><span style="color:#24292E">            .</span><span style="color:#6F42C1">WithOpenApi</span><span style="color:#24292E">()</span></span>
+<span class="line"><span style="color:#24292E">            .</span><span style="color:#6F42C1">WithName</span><span style="color:#24292E">(</span><span style="color:#032F62">"GetHello"</span><span style="color:#24292E">)</span></span>
+<span class="line"><span style="color:#24292E">            .</span><span style="color:#6F42C1">WithSummary</span><span style="color:#24292E">(</span><span style="color:#032F62">"Get personalized hello message"</span><span style="color:#24292E">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E">        app.</span><span style="color:#6F42C1">MapPost</span><span style="color:#24292E">(</span><span style="color:#032F62">"/hello"</span><span style="color:#24292E">, PostHello)</span></span>
+<span class="line"><span style="color:#24292E">            .</span><span style="color:#6F42C1">RequireAuthorization</span><span style="color:#24292E">()</span></span>
+<span class="line"><span style="color:#24292E">            .</span><span style="color:#6F42C1">WithOpenApi</span><span style="color:#24292E">()</span></span>
+<span class="line"><span style="color:#24292E">            .</span><span style="color:#6F42C1">WithName</span><span style="color:#24292E">(</span><span style="color:#032F62">"PostHello"</span><span style="color:#24292E">)</span></span>
+<span class="line"><span style="color:#24292E">            .</span><span style="color:#6F42C1">WithSummary</span><span style="color:#24292E">(</span><span style="color:#032F62">"Post a personalized hello message"</span><span style="color:#24292E">);</span></span>
+<span class="line"><span style="color:#24292E">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49">    private</span><span style="color:#D73A49"> static</span><span style="color:#6F42C1"> GetHelloResponse</span><span style="color:#6F42C1"> GetHello</span><span style="color:#24292E">(</span><span style="color:#6F42C1">IHelloService</span><span style="color:#6F42C1"> helloService</span><span style="color:#24292E">)</span></span>
+<span class="line"><span style="color:#24292E">    {</span></span>
+<span class="line"><span style="color:#D73A49">        return</span><span style="color:#24292E"> helloService.</span><span style="color:#6F42C1">FetchHello</span><span style="color:#24292E">();</span></span>
+<span class="line"><span style="color:#24292E">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49">    private</span><span style="color:#D73A49"> static</span><span style="color:#D73A49"> string</span><span style="color:#6F42C1"> PostHello</span><span style="color:#24292E">(</span></span>
+<span class="line"><span style="color:#6F42C1">        IHelloService</span><span style="color:#6F42C1"> helloService</span><span style="color:#24292E">,</span></span>
+<span class="line"><span style="color:#24292E">        [</span><span style="color:#6F42C1">FromBody</span><span style="color:#24292E">] </span><span style="color:#6F42C1">PostHelloRequest</span><span style="color:#6F42C1"> request</span><span style="color:#24292E">)</span></span>
+<span class="line"><span style="color:#24292E">    {</span></span>
+<span class="line"><span style="color:#D73A49">        return</span><span style="color:#24292E"> helloService.</span><span style="color:#6F42C1">SendHello</span><span style="color:#24292E">(request.Name);</span></span>
+<span class="line"><span style="color:#24292E">    }</span></span>
+<span class="line"><span style="color:#24292E">}</span></span>
+<span class="line"></span></code></pre>
+<p>You see though, that if you then add more endpoints in <code>MapHelloEndpoints</code>, the building of routes will start to get long and unwieldy. And the handler methods for the endpoints will be pushed further down making the file longer and harder to navigate.</p>
+<p>Another issue here as well, is that as each handler method grows in complexity and length, co-locating them all in one file can also make it harder to see the big picture of what the API does. I find this is also an issue with Controller-classes that contains many methods.</p>
+<p>Instead what I suggest is to create a separate class for each endpoint, but co-locate the route building in the same file, <code>HelloEndpoints</code> in this example. That way you quickly see which routes exists and their configuration, while still having a clear picture of what each endpoint does.</p>
+<p>The above then becomes three distinct files:</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="csharp"><code><span class="line"><span style="color:#D73A49">public</span><span style="color:#D73A49"> static</span><span style="color:#D73A49"> class</span><span style="color:#6F42C1"> HelloEndpoints</span></span>
+<span class="line"><span style="color:#24292E">{</span></span>
+<span class="line"><span style="color:#D73A49">    public</span><span style="color:#D73A49"> static</span><span style="color:#D73A49"> void</span><span style="color:#6F42C1"> MapHelloEndpoints</span><span style="color:#24292E">(</span><span style="color:#D73A49">this</span><span style="color:#6F42C1"> WebApplication</span><span style="color:#6F42C1"> app</span><span style="color:#24292E">)</span></span>
+<span class="line"><span style="color:#24292E">    {</span></span>
+<span class="line"><span style="color:#24292E">        app.</span><span style="color:#6F42C1">MapGet</span><span style="color:#24292E">(</span><span style="color:#032F62">"/hello"</span><span style="color:#24292E">, GetHello.Handle)</span></span>
+<span class="line"><span style="color:#24292E">            .</span><span style="color:#6F42C1">RequireAuthorization</span><span style="color:#24292E">()</span></span>
+<span class="line"><span style="color:#24292E">            .</span><span style="color:#6F42C1">WithName</span><span style="color:#24292E">(</span><span style="color:#032F62">"GetHello"</span><span style="color:#24292E">)</span></span>
+<span class="line"><span style="color:#24292E">            .</span><span style="color:#6F42C1">WithSummary</span><span style="color:#24292E">(</span><span style="color:#032F62">"Get personalized hello message"</span><span style="color:#24292E">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E">        app.</span><span style="color:#6F42C1">MapPost</span><span style="color:#24292E">(</span><span style="color:#032F62">"/hello"</span><span style="color:#24292E">, PostHello.Handle)</span></span>
+<span class="line"><span style="color:#24292E">            .</span><span style="color:#6F42C1">RequireAuthorization</span><span style="color:#24292E">()</span></span>
+<span class="line"><span style="color:#24292E">            .</span><span style="color:#6F42C1">WithName</span><span style="color:#24292E">(</span><span style="color:#032F62">"PostHello"</span><span style="color:#24292E">)</span></span>
+<span class="line"><span style="color:#24292E">            .</span><span style="color:#6F42C1">WithSummary</span><span style="color:#24292E">(</span><span style="color:#032F62">"Post a personalized hello message"</span><span style="color:#24292E">);</span></span>
+<span class="line"><span style="color:#24292E">    }</span></span>
+<span class="line"><span style="color:#24292E">}</span></span>
+<span class="line"></span></code></pre>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="csharp"><code><span class="line"><span style="color:#D73A49">public</span><span style="color:#D73A49"> class</span><span style="color:#6F42C1"> GetHello</span></span>
+<span class="line"><span style="color:#24292E">{</span></span>
+<span class="line"><span style="color:#D73A49">    public</span><span style="color:#D73A49"> static</span><span style="color:#6F42C1"> GetHelloResponse</span><span style="color:#6F42C1"> Handle</span><span style="color:#24292E">(</span><span style="color:#6F42C1">IHelloService</span><span style="color:#6F42C1"> helloService</span><span style="color:#24292E">)</span></span>
+<span class="line"><span style="color:#24292E">    {</span></span>
+<span class="line"><span style="color:#D73A49">        return</span><span style="color:#24292E"> helloService.</span><span style="color:#6F42C1">FetchHello</span><span style="color:#24292E">();</span></span>
+<span class="line"><span style="color:#24292E">    }</span></span>
+<span class="line"><span style="color:#24292E">}</span></span>
+<span class="line"></span></code></pre>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="csharp"><code><span class="line"><span style="color:#D73A49">public</span><span style="color:#D73A49"> class</span><span style="color:#6F42C1"> PostHello</span></span>
+<span class="line"><span style="color:#24292E">{</span></span>
+<span class="line"><span style="color:#D73A49">    public</span><span style="color:#D73A49"> static</span><span style="color:#D73A49"> string</span><span style="color:#6F42C1"> Handle</span><span style="color:#24292E">(</span></span>
+<span class="line"><span style="color:#6F42C1">        IHelloService</span><span style="color:#6F42C1"> helloService</span><span style="color:#24292E">,</span></span>
+<span class="line"><span style="color:#24292E">        [</span><span style="color:#6F42C1">FromBody</span><span style="color:#24292E">] </span><span style="color:#6F42C1">PostHelloRequest</span><span style="color:#6F42C1"> request</span><span style="color:#24292E">)</span></span>
+<span class="line"><span style="color:#24292E">    {</span></span>
+<span class="line"><span style="color:#D73A49">        return</span><span style="color:#24292E"> helloService.</span><span style="color:#6F42C1">SendHello</span><span style="color:#24292E">(request.Name);</span></span>
+<span class="line"><span style="color:#24292E">    }</span></span>
+<span class="line"><span style="color:#24292E">}</span></span>
+<span class="line"></span></code></pre>
+<p>As you see the method has been renamed to <code>Handle</code> to make it clear that it’s the handler for the endpoint, and the containing class has been named after the endpoint. Each route that is added refers to the <code>Handle</code>-method in the corresponding endpoint-class.</p>
+<p>Now we’re getting somewhere! You have a much clearer separation of concerns. In <code>HelloEndpoints</code>, you can focus on defining the structure and routing of your API. This is where you can define aspects like OpenAPI, authorization, and other higher level concerns.</p>
+<p>In turn, by encapsulating each handler into its own class like <code>GetHello</code> and <code>PostHello</code>, will allow you to remain focused on implementing the specific business logic they are designed for, without the overarching concerns of routing and structure.</p>
+<p>It might be tempting to co-locate the route and its handler in the same class, but I would argue against it.</p>
+<h2 id="still-too-much-boilerplate">Still too much boilerplate!</h2>
+<p>Another benefit of Controller-classes is that you can add attributes to the class which applies to all actions in the class. The same can be achieved with Minimal API by using a <code>RouteGroupBuilder</code>, and the pattern we’ve followed so far makes that easier.</p>
+<p>Say we want to add authorization to all routes in the <code>HelloEndpoints</code>. And like with <code>[Route]</code> in Controllers, we want to add a common prefix to all the routes. By using <code>app.MapGroup</code> to create a route group, and adding an authorization requirement to the group, all routes added to that group will inherit that behaviour:</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="csharp"><code><span class="line"><span style="color:#D73A49">public</span><span style="color:#D73A49"> static</span><span style="color:#D73A49"> class</span><span style="color:#6F42C1"> HelloEndpointsGroup</span></span>
+<span class="line"><span style="color:#24292E">{</span></span>
+<span class="line"><span style="color:#D73A49">    public</span><span style="color:#D73A49"> static</span><span style="color:#D73A49"> void</span><span style="color:#6F42C1"> MapHelloEndpoints</span><span style="color:#24292E">(</span><span style="color:#D73A49">this</span><span style="color:#6F42C1"> WebApplication</span><span style="color:#6F42C1"> app</span><span style="color:#24292E">)</span></span>
+<span class="line"><span style="color:#24292E">    {</span></span>
+<span class="line"><span style="color:#D73A49">        var</span><span style="color:#6F42C1"> group</span><span style="color:#D73A49"> =</span><span style="color:#24292E"> app.</span><span style="color:#6F42C1">MapGroup</span><span style="color:#24292E">(</span><span style="color:#032F62">"hello"</span><span style="color:#24292E">)</span></span>
+<span class="line"><span style="color:#24292E">            .</span><span style="color:#6F42C1">WithOpenApi</span><span style="color:#24292E">()</span></span>
+<span class="line"><span style="color:#24292E">            .</span><span style="color:#6F42C1">RequireAuthorization</span><span style="color:#24292E">();</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E">        group.</span><span style="color:#6F42C1">MapGet</span><span style="color:#24292E">(</span><span style="color:#032F62">"/"</span><span style="color:#24292E">, GetHello.Handle)</span></span>
+<span class="line"><span style="color:#24292E">            .</span><span style="color:#6F42C1">WithName</span><span style="color:#24292E">(</span><span style="color:#032F62">"GetHello"</span><span style="color:#24292E">)</span></span>
+<span class="line"><span style="color:#24292E">            .</span><span style="color:#6F42C1">WithSummary</span><span style="color:#24292E">(</span><span style="color:#032F62">"Get personalized hello message"</span><span style="color:#24292E">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E">        group.</span><span style="color:#6F42C1">MapPost</span><span style="color:#24292E">(</span><span style="color:#032F62">"/"</span><span style="color:#24292E">, PostHello.Handle)</span></span>
+<span class="line"><span style="color:#24292E">            .</span><span style="color:#6F42C1">WithName</span><span style="color:#24292E">(</span><span style="color:#032F62">"PostHello"</span><span style="color:#24292E">)</span></span>
+<span class="line"><span style="color:#24292E">            .</span><span style="color:#6F42C1">WithSummary</span><span style="color:#24292E">(</span><span style="color:#032F62">"Post a personalized hello message"</span><span style="color:#24292E">);</span></span>
+<span class="line"><span style="color:#24292E">    }</span></span>
+<span class="line"><span style="color:#24292E">}</span></span>
+<span class="line"></span></code></pre>
+<p>As you might have noticed, I’ve renamed the class to <code>HelloEndpointsGroup</code>. And all routes belonging to the constructed <code>group</code> will require authorization, and all routes will have the prefix <code>/hello</code>.</p>
+<p>You can take this further by creating a <code>RouteGroupBuilder</code> extension method that encapsulates the common behavior you want to apply to all route-groups of a certain type.</p>
+<p>One way this can be demonstrated is that <code>RequireAuthorization</code> can take in an authorization policy name. Let’s say we’ve defined an authorization policy named <code>admin</code>:</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="csharp"><code><span class="line"><span style="color:#6A737D">// Program.cs</span></span>
+<span class="line"><span style="color:#24292E">builder.Services.</span><span style="color:#6F42C1">AddAuthorization</span><span style="color:#24292E">(</span><span style="color:#6F42C1">options</span><span style="color:#D73A49"> =></span></span>
+<span class="line"><span style="color:#24292E">    options.</span><span style="color:#6F42C1">AddPolicy</span><span style="color:#24292E">(</span><span style="color:#032F62">"admin"</span><span style="color:#24292E">, </span><span style="color:#6F42C1">policy</span><span style="color:#D73A49"> =></span></span>
+<span class="line"><span style="color:#24292E">      policy.</span><span style="color:#6F42C1">RequireClaim</span><span style="color:#24292E">(JwtClaimTypes.Role, </span><span style="color:#032F62">"admin"</span><span style="color:#24292E">)</span></span>
+<span class="line"><span style="color:#24292E">    )</span></span>
+<span class="line"><span style="color:#24292E">);</span></span>
+<span class="line"></span></code></pre>
+<p>You are able to say that a group (or endpoint) requires the <code>admin</code> policy like this:</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="csharp"><code><span class="line"><span style="color:#D73A49">var</span><span style="color:#6F42C1"> group</span><span style="color:#D73A49"> =</span><span style="color:#24292E"> app.</span><span style="color:#6F42C1">MapGroup</span><span style="color:#24292E">(</span><span style="color:#032F62">"hello"</span><span style="color:#24292E">)</span></span>
+<span class="line"><span style="color:#24292E">               .</span><span style="color:#6F42C1">RequireAuthorization</span><span style="color:#24292E">(</span><span style="color:#032F62">"admin"</span><span style="color:#24292E">);</span></span>
+<span class="line"></span></code></pre>
+<p>If you have many groups which you want to apply the same authorization policy to, it’s a good idea to create an extension method for that. You can at the same time add other common behavior you want to apply to all groups. Here’s an example of such an extension method for creating admin-groups:</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="csharp"><code><span class="line"><span style="color:#D73A49">public</span><span style="color:#D73A49"> static</span><span style="color:#D73A49"> class</span><span style="color:#6F42C1"> RouteGroupBuilderExtensions</span></span>
+<span class="line"><span style="color:#24292E">{</span></span>
+<span class="line"><span style="color:#D73A49">    public</span><span style="color:#D73A49"> static</span><span style="color:#6F42C1"> RouteGroupBuilder</span><span style="color:#6F42C1"> MapAdminGroup</span><span style="color:#24292E">(</span></span>
+<span class="line"><span style="color:#D73A49">        this</span><span style="color:#6F42C1"> IEndpointRouteBuilder</span><span style="color:#6F42C1"> builder</span><span style="color:#24292E">,</span></span>
+<span class="line"><span style="color:#24292E">        [</span><span style="color:#6F42C1">StringSyntax</span><span style="color:#24292E">(</span><span style="color:#032F62">"Route"</span><span style="color:#24292E">)] </span><span style="color:#D73A49">string</span><span style="color:#6F42C1"> prefix</span><span style="color:#24292E">,</span></span>
+<span class="line"><span style="color:#D73A49">        string</span><span style="color:#6F42C1"> groupName</span><span style="color:#24292E">)</span></span>
+<span class="line"><span style="color:#24292E">    {</span></span>
+<span class="line"><span style="color:#D73A49">        return</span><span style="color:#24292E"> builder.</span><span style="color:#6F42C1">MapGroup</span><span style="color:#24292E">(</span><span style="color:#032F62">$"admin/{</span><span style="color:#24292E">prefix</span><span style="color:#032F62">}"</span><span style="color:#24292E">)</span></span>
+<span class="line"><span style="color:#24292E">            .</span><span style="color:#6F42C1">WithOpenApi</span><span style="color:#24292E">()</span></span>
+<span class="line"><span style="color:#24292E">            .</span><span style="color:#6F42C1">WithTags</span><span style="color:#24292E">(groupName) </span><span style="color:#6A737D">// Add tag which groups these endpoints in Swagger UI</span></span>
+<span class="line"><span style="color:#24292E">            .</span><span style="color:#6F42C1">RequireAuthorization</span><span style="color:#24292E">(</span><span style="color:#032F62">"admin"</span><span style="color:#24292E">);</span></span>
+<span class="line"><span style="color:#24292E">    }</span></span>
+<span class="line"><span style="color:#24292E">}</span></span>
+<span class="line"></span></code></pre>
+<p>All groups which are built with <code>MapAdminGroup</code> will require the <code>admin</code> policy, and have the prefix <code>/admin</code>.</p>
+<p>Another minor change we must do now is that <code>MapHelloEndpoints</code> in <code>HelloEndpointsGroup</code> must be changed to be an extension method for <code>RouteGroupBuilder</code> instead of <code>WebApplication</code>. I also recommend returning the <code>group</code> from the method, so that you can chain multiple groups together in <code>Program.cs</code>:</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="csharp"><code><span class="line"><span style="color:#D73A49">public</span><span style="color:#D73A49"> static</span><span style="color:#D73A49"> class</span><span style="color:#6F42C1"> HelloEndpointsGroup</span></span>
+<span class="line"><span style="color:#24292E">{</span></span>
+<span class="line"><span style="color:#D73A49">    public</span><span style="color:#D73A49"> static</span><span style="color:#6F42C1"> RouteGroupBuilder</span><span style="color:#6F42C1"> MapHelloEndpoints</span><span style="color:#24292E">(</span><span style="color:#D73A49">this</span><span style="color:#6F42C1"> RouteGroupBuilder</span><span style="color:#6F42C1"> group</span><span style="color:#24292E">)</span></span>
+<span class="line"><span style="color:#24292E">    {</span></span>
+<span class="line"><span style="color:#24292E">        group.</span><span style="color:#6F42C1">MapGet</span><span style="color:#24292E">(</span><span style="color:#032F62">"/"</span><span style="color:#24292E">, GetHello.Handle)</span></span>
+<span class="line"><span style="color:#24292E">            .</span><span style="color:#6F42C1">WithName</span><span style="color:#24292E">(</span><span style="color:#032F62">"GetHello"</span><span style="color:#24292E">)</span></span>
+<span class="line"><span style="color:#24292E">            .</span><span style="color:#6F42C1">WithSummary</span><span style="color:#24292E">(</span><span style="color:#032F62">"Get personalized hello message"</span><span style="color:#24292E">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E">        group.</span><span style="color:#6F42C1">MapPost</span><span style="color:#24292E">(</span><span style="color:#032F62">"/"</span><span style="color:#24292E">, PostHello.Handle)</span></span>
+<span class="line"><span style="color:#24292E">            .</span><span style="color:#6F42C1">WithName</span><span style="color:#24292E">(</span><span style="color:#032F62">"PostHello"</span><span style="color:#24292E">)</span></span>
+<span class="line"><span style="color:#24292E">            .</span><span style="color:#6F42C1">WithSummary</span><span style="color:#24292E">(</span><span style="color:#032F62">"Post a personalized hello message"</span><span style="color:#24292E">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49">        return</span><span style="color:#24292E"> group;</span></span>
+<span class="line"><span style="color:#24292E">    }</span></span>
+<span class="line"><span style="color:#24292E">}</span></span>
+<span class="line"></span></code></pre>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="csharp"><code><span class="line"><span style="color:#6A737D">// Program.cs</span></span>
+<span class="line"><span style="color:#24292E">app.</span><span style="color:#6F42C1">MapAdminGroup</span><span style="color:#24292E">(</span><span style="color:#032F62">"hello"</span><span style="color:#24292E">, </span><span style="color:#032F62">"Hello"</span><span style="color:#24292E">)</span></span>
+<span class="line"><span style="color:#24292E">    .</span><span style="color:#6F42C1">MapHelloEndpoints</span><span style="color:#24292E">()</span></span>
+<span class="line"><span style="color:#24292E">    .</span><span style="color:#6F42C1">MapHelloGoodbyeEndpoints</span><span style="color:#24292E">();</span></span>
+<span class="line"></span></code></pre>
+<p>Now <code>/hello</code> is instead available under <code>/admin/hello</code> since we’ve decided in the <code>MapAdminGroup</code>-method that all admin-endpoints should belong under <code>/admin</code>. It also enforces that any calls to that endpoint will require the <code>admin</code>-role because of the policy.</p>
+<p>I’ve also added another example called <code>HelloGoodbye</code> in the code above which will inherit the same behaviour as the <code>Hello</code>-group because they are chained together. If you don’t want or need to chain groups of endpoints like this together, you could call <code>MapAdminGroup</code> explicitly inside <code>MapHelloEndpoints</code> to further encapsulate the group behaviour.</p>
+<h2 id="a-note-on-file-structure">A note on file structure</h2>
+<p>How you organize your files is of course up to you, but I prefer a structure like this:</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>src/</span></span>
+<span class="line"><span>  Api/</span></span>
+<span class="line"><span>    Routes/</span></span>
+<span class="line"><span>      Hello/</span></span>
+<span class="line"><span>        Models/</span></span>
+<span class="line"><span>            GetHelloResponse.cs</span></span>
+<span class="line"><span>            PostHelloRequest.cs</span></span>
+<span class="line"><span>        Endpoints/</span></span>
+<span class="line"><span>            GetHello.cs</span></span>
+<span class="line"><span>            PostHello.cs</span></span>
+<span class="line"><span>        HelloEndpointsGroup.cs</span></span>
+<span class="line"><span>      HelloGoodbye/</span></span>
+<span class="line"><span>        Endpoints/</span></span>
+<span class="line"><span>            GetHelloGoodbye.cs</span></span>
+<span class="line"><span>        HelloGoodbyeEndpointsGroup.cs</span></span>
+<span class="line"><span>      RouteGroupBuilderExtensions.cs</span></span>
+<span class="line"><span>    Program.cs</span></span>
+<span class="line"><span></span></span></code></pre>
+<p>If you have nested routes, for example <code>GET /hello/{id}/goodbye</code>, I would recommend creating a new group and folder for each level of nesting. Like with <code>HelloGoodbye</code> here, where <code>/goodbye</code> is nested under <code>/hello</code> in terms of route, but has its own group and folder at the same level as <code>Hello</code> in terms of file structure. This is because I find it makes it quicker to see and navigate to each group of routes in my editor if they live at the same level in the file tree.</p>
+<p>Some might prefer to keep all endpoints and nested groups in the same folder. Or, almost like a file-based router, put nested groups in their own folder under the parent groups folder. That’s fine too!</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>There are libraries which can be used as alternatives to MVC Controllers which are similar and will help encapsulate common behaviours and patterns like what I’m trying to solve here. Some examples are <a href="https://fast-endpoints.com/">https://fast-endpoints.com/</a>, <a href="https://github.com/ardalis/ApiEndpoints">https://github.com/ardalis/ApiEndpoints</a> and <a href="https://github.com/CarterCommunity/Carter">https://github.com/CarterCommunity/Carter</a>.</p>
+<p>These are all great and I’d recommend checking them out. The reason why I choose not to use them myself is because I think Minimal API with some simple extension methods, explicit routing and sensible structure is powerful enough in itself.</p>
+<p>By following the pattern described in this blog post, I’ve been able to scale Minimal APIs from prototyping to large production APIs. I’m not saying this is the “right way”, but this has worked well for me.</p>
+<p>I hope this post has been of help, and that you can now start building your Minimal APIs in a way that makes sense to you! 😊</p>
+<p>PS. I’ve got a follow up from this post after questions in the comments related to <a href="/better-openapi-in-minimal-api-with-typedresults">generating OpenAPI documentation in Minimal API with TypedResults</a>.</p> </div> <hr> <div class="bio"> <img src="/_astro/chr_circle.CeHLPlM8_180SWW.webp" alt="Christian Brevik" width="56" height="56" loading="lazy" decoding="async"> <p> <strong>Hi there!</strong> I'm a developer living in Trondheim. Find me on  <a href="https://github.com/cbrevik">Github</a> or  <a href="https://bsky.app/profile/cbrevik.bsky.social">Bluesky</a>.
+</p> </div> <ul class="post-nav"> <li> <a href="/chatgptify-your-website-with-pinecone-and-openai" rel="prev">← How to use Pinecone and OpenAI to ChatGPTify your website!</a> </li> <li> <a href="/better-openapi-in-minimal-api-with-typedresults" rel="next">Better OpenAPI in Minimal API with TypedResults →</a> </li> </ul>  </div> </body></html> 
