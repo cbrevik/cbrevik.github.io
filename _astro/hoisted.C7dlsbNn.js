@@ -1,0 +1,1 @@
+import"./hoisted.D8_g8hrt.js";document.querySelectorAll("pre").forEach(e=>{const t=document.createElement("button");t.className="copy-button",t.textContent="Copy",t.addEventListener("click",async()=>{const o=e.querySelector("code");await navigator.clipboard.writeText(o?.innerText??""),t.textContent="Copied!",setTimeout(()=>{t.textContent="Copy"},2e3)}),e.appendChild(t)});
